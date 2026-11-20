@@ -13,6 +13,7 @@ for the demo. Seed documents are **inputs** to the pipeline, not scripted output
 | `reply_A_v2.txt` | Fictional | Provider A email reply: crematory fee $395, refrigeration $150 → $195 | — |
 | `reply_A_alt.txt` | Fictional | Same facts as `reply_A_v2.txt`, different wording/format (Firedrill scenario 3) | — |
 | `ftc_reference.txt` | **Real** (paraphrased) | FTC consumer Funeral Rule guidance: alternative container, itemized prices/GPL, choosing only what you want / no false "required" claims, packages | FTC-1 … FTC-4 |
+| `real_gpl.pdf` | **Real** (Menlo Park Funeral Home and Cremation Services, FD #2060) | Public seven-page General Price List; extraction test only | [Provider PDF](https://cdn.f1connect.net/cdn/15678M-Xj0/gpl/Menlo%20Park%20Funeral%20and%20Cremation%20Services%20GPL.pdf) |
 
 ## Wish IDs
 
@@ -31,9 +32,8 @@ for the demo. Seed documents are **inputs** to the pipeline, not scripted output
 
 ## Real public price list
 
-**PENDING — Lisha to supply file + URL + capture date.**
-
-- File: `data/real_gpl.pdf` (or .txt) — PENDING
-- Source URL: PENDING
-- Capture date: PENDING
+- File: `data/real_gpl.pdf`
+- Source URL: https://cdn.f1connect.net/cdn/15678M-Xj0/gpl/Menlo%20Park%20Funeral%20and%20Cremation%20Services%20GPL.pdf
+- Capture date: 2026-11-20
+- Printed effective date: March 8, 2026 (as shown in the document)
 - Use: extraction test only; never mixed with the fictional traps.
