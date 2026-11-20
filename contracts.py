@@ -4,7 +4,7 @@ Do not change these shapes without telling both Lisha and Manank.
 """
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict
+from typing import Literal, NotRequired, Optional, TypedDict
 
 Category = Literal["basic_fee", "optional", "cash_advance", "package", "stated_requirement"]
 PriceType = Literal["fixed", "estimated", "starting_at", "unknown"]
@@ -43,7 +43,7 @@ class Flag(TypedDict):
 
 class NotNeeded(TypedDict):
     item_id: str
-    savings: float
+    savings: Optional[float]   # None if the excluded item's price is unknown
 
 
 class Plan(TypedDict):
@@ -57,6 +57,9 @@ class Plan(TypedDict):
     unresolved: list[str]            # e.g. ["A: crematory fee"]
     not_needed: list[NotNeeded]
     wishes_satisfied: list[str]      # e.g. ["W1", "W2", "W3"]
+    notes: NotRequired[list[str]]    # plain notes, e.g. kept items that conflict with a wish
+    # estimated_high covers priced items only; never present known+est_high as a ceiling
+    # while `unresolved` is non-empty.
 
 
 class RecallResult(TypedDict):

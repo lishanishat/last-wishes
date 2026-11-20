@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 .cognee*/
 .streamlit/secrets.toml
+.lw_dev.sqlite
