@@ -2,23 +2,86 @@
 
 *The agent follows up. The family decides.*
 
-> Full README (architecture, SIE recipes, Cognee calls, benchmark, Firedrill results, sources) is written at CP5.
+Last Wishes helps a family compare funeral quotes against a parent's recorded wishes. It extracts quoted lines, points out prices needing clarification and services the family did not select, remembers the follow-up across an app restart, and sends only the family's approved arrangement **request**. The final state is **“Arrangement request sent — awaiting provider confirmation.”** It never pays or books.
 
-## Setup
+This is a hackathon prototype. Linda, Maya, and providers A/B/C are fictional. The public General Price List is a separate extraction test and is never mixed into the fictional comparison.
 
-**Python 3.12 is required.** Cognee does not support Python 3.14 (the macOS system default here), so the project pins 3.12 in `.python-version`.
+## Run locally
+
+Python **3.12** is required. The checked-in lock file was made with the working `.venv`; use its binaries rather than the system Python. On a fresh machine:
 
 ```bash
 python3.12 -m venv .venv
-.venv/bin/pip install -r requirements.lock.txt   # exact versions we tested
-cp .env.example .env                              # then fill in keys
+.venv/bin/pip install -r requirements.lock.txt
+cp .env.example .env
 ```
 
-Always use the venv's binaries directly, never the system `python`/`streamlit`:
+Fill `.env` with the service credentials you have. `SINGLESTORE_URL` uses the SingleStore connection string. `SIE_API_KEY` is required for live quote extraction; `SIE_BASE_URL` defaults to `https://api.superlinked.com`. `LLM_API_KEY` enables Cognee's `add`/`cognify` semantic path; `ANTHROPIC_API_KEY` enables optional drafted wording. `PERSONA_API_KEY` and `PERSONA_TEMPLATE_ID` must be sandbox credentials for the identity gate. Never commit `.env` or paste keys into issues, logs, or screenshots.
 
 ```bash
 .venv/bin/python -m pytest -q
 .venv/bin/streamlit run app.py
 ```
 
-`requirements.txt` lists top-level dependencies; `requirements.lock.txt` is `pip freeze` from the working venv.
+Open <http://localhost:8501>. The app stores quote versions, approvals, send status, audit records, and SIE traces in SingleStore. Without `SINGLESTORE_URL`, it uses the local SQLite development database. The SingleStore free shared tier permits at most ten tables; the schema uses exactly ten, without rowstore tables. FTC references are stored as `documents` rows. `db.py` does not create vector columns in this tier.
+
+## Demo flow
+
+1. In **Wishes**, load Linda's note and Maya's confirmation.
+2. In **Quotes**, read fictional A, B, and C. In **Compare**, A's crematory charge stays unresolved; C's casket statement appears beside public FTC guidance as a **review flag / needs clarification**. The “Not needed” list shows excluded optional items and their quoted savings. The optimizer chooses among plans with known prices and does not call an incomplete quote cheapest.
+3. In **Approvals**, review the exact clarification recipient, quote version, and message. Approval #1 inserts one sandbox outbox row; retrying the same approval does not send another.
+4. Stop and restart Streamlit. In **Inbox**, read `data/reply_A_v2.txt`. It creates A-v2, keeps A-v1, and replans. **Memory** shows the Cognee recall query plus returned nodes and edges; **Diff** shows the changed fee, resolved unknown, source excerpts, and plan change. `data/reply_A_alt.txt` is a differently worded input for the same extraction path.
+5. Select a quote and review the arrangement card and evidence receipt. A Persona sandbox inquiry must report `approved` before Approval #2 can send the exact arrangement request. The outbox is sandbox only; it does not contact a real provider.
+
+No number shown in the comparison is a scripted result. Each comes from the input documents through extraction, validation, and code-side planning. Unknown prices remain unresolved; a starting-at price has no invented ceiling. The LLM may draft or explain, but it does not decide flags, totals, compliance, or approvals. If an LLM key is absent, wording is marked as a template draft.
+
+## Architecture and data ownership
+
+```mermaid
+flowchart LR
+  D[data/ documents] --> S[SIE extract and classify]
+  S --> V[Validate and normalize]
+  V --> R[Code rules and optimizer]
+  V --> DB[(SingleStore: exact state)]
+  R --> DB
+  DB --> UI[Streamlit review and approvals]
+  V --> M[(Cognee: wishes, quotes, questions, replies)]
+  M --> UI
+  UI --> P[Persona sandbox identity check]
+  P --> O[Idempotent sandbox outbox]
+  O --> DB
+```
+
+`contracts.py` defines the shared `LineItem`, `Flag`, `Plan`, recall, and SIE trace shapes. SingleStore is authoritative for exact prices, quote versions, approval hashes, and send-once state. Cognee stores graph relationships and provenance for recall; it cannot authorize a send. Approval is tied to one message and quote version, and a later quote invalidates the prepared card.
+
+## Superlinked SIE
+
+The wrappers use the documented `sie-sdk` API. Each call records recipe, model, latency, input length, and source excerpts in `sie_calls`; the app exposes these in the **Trace** drawer.
+
+| Recipe | Model | Use |
+|---|---|---|
+| `extract` | `fastino/gliner2-large-v1` | Entity spans from quote/reply segments |
+| `classify` | `fastino/GLiNER2.5-Decide` | Choice among core fee, optional, cash advance, package, stated requirement |
+| `rerank` | `Qwen/Qwen3-Reranker-4B` | Source excerpt ranking when requested |
+
+Money and price types are parsed from verbatim excerpts in code. Explicit optional-service normalization corrects observed Decide false `basic_fee` labels for viewing and embalming. The casket review flag still requires SIE's `stated_requirement` label and the code rule, with the provider text beside the FTC reference. Live checks on 2026-11-20 extracted A, B, C, both replies, and 60 candidate lines from the public PDF. The PDF also produced price-less guidance sentences as candidates; that is a known extraction limitation, so its output is kept separate from the fictional comparison.
+
+## Cognee memory
+
+`memory/cognee_mem.py` writes typed `Person`, `FamilyMember`, `Wish`, `Document`, `Provider`, `Quote`, `LineItem`, `Question`, `Reply`, and `Plan` data points and their links through Cognee's graph APIs. Its public calls are `remember_wish`, `remember_confirmation`, `remember_quote`, `remember_question`, `remember_reply`, `remember_plan`, `recall`, `graph_snapshot`, and `reset_memory`. `recall` calls `cognee.search` with `GRAPH_COMPLETION` and `only_context=True`, and returns the actual nodes and edges. With `LLM_API_KEY`, raw text is also queued through `cognee.add` and `cognee.cognify`; that LLM path requires separate live verification.
+
+The graph uses local FastEmbed embeddings and the Turso graph provider. A real Streamlit stop/start on 2026-11-20 preserved the wishes and quotes, and recall after the reply returned the pending question and linked wishes as actual graph nodes and edges. The **Memory** tab has a counterfactual control to exclude a wish from recall.
+
+## Benchmark and Firedrill
+
+The planned benchmark hand-labels 10–20 items from the fictional quotes and the separate public price list, then compares SIE extract/classify with one general LLM on the same text. It reports field accuracy, category accuracy, latency, and estimated cost, including losses. **Results have not been delivered or run yet.** When available, the complete table belongs in `bench/results.md`.
+
+Firedrill's planned scenarios are approval invalidation after a quote change, send failure/retry without duplicate delivery, and extraction from the differently worded reply. **Firedrill results have not been run yet**; report a “passed X of Y” count in `tests/firedrill/results.md` once the quickstart and scenarios are available. The repository's ordinary offline tests cover these safety paths separately.
+
+## Sources and limits
+
+- Fictional notes, quotes, and replies: [`data/SOURCES.md`](data/SOURCES.md).
+- Real price list: [Menlo Park Funeral Home and Cremation Services General Price List](https://cdn.f1connect.net/cdn/15678M-Xj0/gpl/Menlo%20Park%20Funeral%20and%20Cremation%20Services%20GPL.pdf), effective March 8, 2026; captured November 20, 2026. Used for extraction only.
+- Public reference: [FTC Funeral Rule guidance](https://consumer.ftc.gov/articles/ftc-funeral-rule), checked November 20, 2026. Flags ask for clarification and do not give legal verdicts.
+
+Persona verifies who is approving, not legal authority. The app uses fictional recipients and a sandbox outbox. No real provider receives an email. The team is **Lisha** (app, SingleStore, approvals, Persona, integration) and **Manank** (SIE pipeline, seed data, rules, optimizer, Cognee, benchmark/Firedrill).
