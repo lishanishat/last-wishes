@@ -1,12 +1,12 @@
 # HANDOFF - Last Wishes build status
 
-Refreshed Fri Nov 20 2026, afternoon PT, for submission. Internal deadline: submit by 4:00 PM (official 4:30). Everything is committed locally on `master`. **No remote exists and nothing has been pushed.**
+Refreshed Fri Nov 20 2026, afternoon PT, for submission. Internal deadline: submit by 4:00 PM (official 4:30). The repo is pushed and public at https://github.com/lishanishat/last-wishes. History was rewritten once to drop attribution trailers; the backup branch `backup-before-rewrite` is local only and must not be pushed.
 
 Read first: `README.md` (what is and is not verified), `LAST_WISHES.md` (spec; section 3 hard rules are binding), `DEMO_SCRIPT.md`, `SUBMISSION.md`.
 
 ## Environment
 - Python 3.12 venv at `.venv/`. Use `.venv/bin/python` and `.venv/bin/streamlit`, including for the on-camera restart (system Python 3.14 is unsupported by Cognee).
-- Run the app: `.venv/bin/streamlit run app.py` (http://localhost:8501). Tests: `.venv/bin/python -m pytest -q` (baseline 109 passed, 1 skipped; the skip is the live Persona test).
+- Run the app: `.venv/bin/streamlit run app.py` (http://localhost:8501). Tests: `.venv/bin/python -m pytest -q` (111 passed, 1 skipped; the skip is the live Persona test).
 - `requirements.txt` plus `requirements.lock.txt`.
 
 ## `.env` (gitignored, never committed) - status only
@@ -35,5 +35,13 @@ The SingleStore password appeared in chat screenshots: reset it after submission
 4. Cold SIE models can take minutes: warm up before recording.
 5. Firedrill campaign state still read "running" when scores were fetched.
 
+## Rehearsal 1 (live app)
+- Steps 1-5 and 8 passed.
+- `reply_A_alt` crash fixed in fb1f8ae. B $50 dropped-item fix in 0d36355.
+- Approval #2 send was **not observed** in rehearsal 1. It is being re-run by another agent; do not state it passed until that result is in.
+
+## Real-world benchmark
+Manank reports a held-out run (8 public price lists, 137 items: found 81.8%, amount 93.8%, price type 72.3%, category 48.2%, all four 41.6%). Not re-run here; `bench/realworld/results.md` is not in the repo yet. README states this.
+
 ## What Lisha must do by hand
-See the checklist in `SUBMISSION.md` (GitHub push needs her approval, demo video with on-camera restart, screenshot, form, password reset). Senso is not part of the build.
+See the checklist in `SUBMISSION.md` (demo video with on-camera restart, screenshot, form, password reset). Senso is not part of the build.

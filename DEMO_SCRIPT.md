@@ -1,17 +1,28 @@
-# Last Wishes demo cue sheet (target: 2½ minutes)
+# Last Wishes demo (3 minutes max)
 
-Record the live app. Keep the providers marked fictional, show the actual SIE trace and Cognee results, and stop/restart Streamlit on screen. Follow the app's current figures rather than reading amounts from this script.
+Record the live app. Providers are fictional. Read amounts from the screen, not from this script.
 
-| Time | Screen | Narration |
-|---|---|---|
-| 0:00–0:15 | Wishes | “Linda wanted cremation, no public viewing, and no unnecessary extras. Maya, her daughter, confirmed those wishes and a working budget. The agent keeps each wish with its source.” |
-| 0:15–0:45 | Quotes → Compare | “Three fictional providers sent quotes in different formats. The agent reads their own words. A leaves the crematory fee unresolved, so its low headline is not treated as the cheapest complete plan. B is itemized. C includes services Linda did not choose.” |
-| 0:45–1:00 | C review flag | “C also says a casket purchase is required for direct cremation. We place that exact statement beside public FTC guidance and ask for clarification. This is a review flag, not a legal verdict.” |
-| 1:00–1:20 | Approvals | “Maya reviews one exact clarification message and recipient. The sandbox outbox sends that approved message once.” |
-| 1:20–1:55 | Stop and restart Streamlit → Inbox → Memory → Diff | “After a real restart, A's reply arrives. Cognee recalls the question, quote, and wishes through returned graph nodes and edges. SIE reads the new fee and revised refrigeration price. A-v2 supersedes A-v1; the unchanged certificate estimate is not counted twice. Here is the line-by-line change and new plan.” |
-| 1:55–2:20 | Approvals + Persona | “Maya selects the version she wants. Persona sandbox verifies who is approving, not her legal authority. She reviews the exact services, quote version, totals, and recipient, then approves a separate arrangement request. The app does not pay. The provider still has to confirm.” |
-| 2:20–2:30 | Trace and benchmark | “These are the SIE recipe/model traces and the complete 13-line benchmark results, including misses.” |
+## Step 1: Drop in the documents (about 1:00)
+- Click **Load wishes**. "Linda wanted cremation, no public viewing, no unnecessary extras. Maya, her daughter, confirmed that."
+- Read quotes A, B, C. "A's crematory fee is Unresolved, so its low headline is not the cheapest complete plan. C includes services Linda did not choose; they show as Not needed savings."
+- C's casket line is flagged beside the public FTC text. "A review flag, not a legal verdict."
+- Approve the one clarification. "Maya approves this exact message once; the sandbox outbox sends it once."
 
-Closing line: **“Here's what Linda wanted, what the quotes actually include, and what changed after her family asked.”**
+## Step 2: The agent says the next step (about 1:00)
+- Stop Streamlit on camera and restart: `.venv/bin/streamlit run app.py`.
+- Paste or upload `data/reply_A_v2.txt`.
+- Quote v2 appears with v1 kept. Show the diff and "what changed". Open Memory: recall nodes and edges returned after the restart.
 
-Before recording, check that the Persona sandbox inquiry can reach `approved` and Approval #2 can send. Firedrill platform results have not arrived; do not narrate them as completed. Label any cached footage **recorded replay**.
+## Step 3: The human approves (about 0:50)
+- Select A-v2. Run the Persona sandbox check: use the sandbox-only simulate button and say it is sandbox. It verifies who is approving, not legal authority.
+- Approval #2 -> "Arrangement request sent — awaiting provider confirmation." The app never pays or books.
+- Close: **"Here's what Linda wanted, what the quotes actually include, and what changed after her family asked."**
+
+## Pre-record checklist
+- [ ] Warm SIE with one extraction (cold models can take minutes).
+- [ ] Reset demo data.
+- [ ] Close the browser tab with the SingleStore Connect panel.
+- [ ] Do not show `.env`.
+- [ ] Label any cached footage "recorded replay".
+- [ ] Drafts are template-labeled unless `ANTHROPIC_API_KEY` is set; say so if asked.
+- [ ] Confirm Persona sandbox reaches `approved` and Approval #2 sends before recording.

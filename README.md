@@ -78,6 +78,19 @@ The app and the demo recording use **local Cognee only**. Cognee Cloud is not wi
 
 The [live benchmark](bench/results.md) hand-labels 13 source-verified lines from the fictional quotes and the separate public price list. It runs the app's SIE extract/classify pipeline and a general Qwen3.8 27B chat model on the same excerpts. SIE got **36/39 price fields** and **13/13 categories**; Qwen chat got **39/39 price fields** and **11/13 categories**. SIE missed the certificate estimate range on one isolated line; Qwen mislabeled A's unresolved crematory fee and B's alternative container. The report includes all cases, wall times, cost estimates and their limits; raw predictions and usage are in [`bench/results.json`](bench/results.json).
 
+### Real-world benchmark (reported by Manank, held-out)
+
+Reported from Manank's separate pipeline; **not re-run in this repository**. The results file (`bench/realworld/results.md`) has not been added to this repo yet and will be added if/when supplied. The 13-line benchmark above is the one run in this repository.
+
+- Our own sample documents (in-sample, tuned on them): SIE pipeline **96.6%** on 29 labeled items.
+- Real-world held-out test: 8 real public price lists, 137 hand-labeled items, live SIE.
+  - Found: **81.8%**
+  - Amount correct, of the items found: **93.8%**
+  - Price type correct: **72.3%**
+  - Category correct: **48.2%**
+  - All four fields correct: **41.6%**
+- What it means: amounts are mostly right when an item is found, but categories on real price lists are not reliable yet, which is why every send needs a human approval.
+
 Firedrill's six scenarios were run by Manank against his own copy of the pipeline and data, not against this repository's app. The platform run covered two of the six: **2 of 2 met the threshold of 75**, with scores of **98.25** (a differently worded reply still yields the crematory charge) and **94.5** (casket flag wording avoids "illegal" and "violation"). See [`tests/firedrill/PLATFORM_SCORES.md`](tests/firedrill/PLATFORM_SCORES.md) (campaign `8a1c6958-7bd5-43fc-89b5-d6d5f8b36ce8`). The other four scenarios ran only as local tests, so they are not platform results. The platform's own state still read "running" when last checked, though both drills showed completed. Limits: the agent under test used the local deterministic parser, and the approval and outbox drills used a stand-in, so they say nothing about this repository's `approvals.py` and `outbox.py`. Those safety paths are covered by this repository's own offline tests (`tests/test_approvals.py`, `tests/test_outbox.py`).
 
 ## Not verified live
