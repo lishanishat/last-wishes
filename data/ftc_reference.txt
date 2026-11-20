@@ -1,26 +1,25 @@
-# FTC Funeral Rule — consumer guidance excerpts (REAL public source, PARAPHRASED).
-# Paraphrased from consumer.ftc.gov; any direct quote is under 15 words.
-# Verify wording on consumer.ftc.gov before recording the demo (see SOURCES.md).
+# FTC Funeral Rule — consumer guidance excerpts (REAL public source).
+# Checked against consumer.ftc.gov on 2026-11-20 (pages dated July 2012).
+# Direct quotes are in quotation marks and under 15 words; the rest is close paraphrase.
 # Format: entries separated by a line "---"; fields ID, TOPIC, URL, TEXT.
 
 ---
 ID: FTC-1
-TOPIC: alternative container for direct cremation
+TOPIC: alternative container for cremation
 URL: https://consumer.ftc.gov/articles/ftc-funeral-rule
-TEXT: Under the Funeral Rule, a funeral provider offering direct cremation must make an alternative container available, such as unfinished wood, pressed wood, fiberboard, or cardboard. A provider may not tell you that state or local law requires a casket for direct cremation, because none do.
+TEXT: A funeral home that offers cremations must tell you that alternative containers are available, and must make them available. They may be made of unfinished wood, pressed wood, fiberboard, or cardboard. "No state or local law requires the use of a casket for cremation."
 ---
 ID: FTC-2
 TOPIC: itemized prices / General Price List
 URL: https://consumer.ftc.gov/articles/ftc-funeral-rule
-TEXT: When you ask about arrangements in person, the funeral home must give you a written, itemized General Price List to keep. You also have the right to get price information over the phone. After you choose, the provider must give you an itemized statement of the goods and services selected, with prices and a total.
+TEXT: You can "get a written, itemized price list when you visit a funeral home," and funeral directors must give price information by telephone if you ask. After you decide what you want, and before you pay, you get a written statement listing every good and service selected, the price of each, and the total cost.
 ---
 ID: FTC-3
-TOPIC: choose only the goods and services you want / no false "required" claims
+TOPIC: choose only what you want / stated requirements
 URL: https://consumer.ftc.gov/articles/ftc-funeral-rule
-TEXT: You have the right to choose only the funeral goods and services you want, with limited exceptions such as the basic services fee. If the provider says a law, cemetery, or crematory requires you to buy a particular item, it must disclose that requirement in writing on the itemized statement and identify the specific law or rule.
+TEXT: "Buy only the funeral arrangements you want." You have the right to buy separate goods and services rather than a package. The written statement from the funeral home must explain any legal, cemetery, or crematory requirement that makes you buy a particular good or service.
 ---
 ID: FTC-4
-TOPIC: packages vs. itemized prices; embalming not generally required
-URL: https://consumer.ftc.gov/articles/shopping-funeral-services
-TEXT: Funeral homes may offer packages, but you can still buy individual items instead, and a package may include things you do not want. Embalming generally is not required by law, especially when a body is cremated promptly, and you can choose direct cremation, which has no viewing or visitation.
----
+TOPIC: packages and embalming
+URL: https://consumer.ftc.gov/articles/ftc-funeral-rule
+TEXT: "You do not have to accept a package that may include items you do not want." "No state law requires routine embalming for every death." Services like direct cremation and immediate burial do not require any form of preservation.

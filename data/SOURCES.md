@@ -26,8 +26,8 @@ for the demo. Seed documents are **inputs** to the pipeline, not scripted output
 ## FTC reference
 
 - URLs: https://consumer.ftc.gov/articles/ftc-funeral-rule , https://consumer.ftc.gov/articles/shopping-funeral-services
-- Text is paraphrased from memory of the public guidance; it was **not** fetched.
-- **Verify wording on consumer.ftc.gov before recording the demo.**
+- Checked against both pages on 2026-11-20 (the pages carry a July 2012 date). All four entries now use only claims the pages make, with short direct quotes marked.
+- Note: the page says cremation providers must offer alternative containers ("cremations", not only "direct cremation"), and that no state or local law requires a casket for cremation.
 
 ## Real public price list
 
