@@ -274,3 +274,12 @@ def test_drafting_template_and_guardrails(monkeypatch):
     assert not drafting._safe("The fee is $999.", "fee $395")
     assert drafting._safe("The fee is $395.", "fee $395.00")
     assert not drafting._safe("This is illegal.", "")
+
+
+def test_second_reply_from_same_provider_does_not_fail(env):
+    _setup_quote(env)
+    card = agent.prepare_clarification("A")
+    agent.approve_and_send(card["approval_id"])
+    agent.ingest_reply(str(env["data"] / "reply_A_v2.txt"), "A")
+    res = agent.ingest_reply(str(env["data"] / "reply_A_v2.txt"), "A")
+    assert res["new_quote_id"] == "A-v3"

@@ -774,10 +774,13 @@ def ingest_reply(text_or_path: str, provider: str, filename: str | None = None) 
     db("insert_line_items", store)
     db("mark_plans_stale", provider)
     remember("remember_quote", new_qid, provider, n, store, supersedes=old_qid)
-    qids = [q for c in approval_cards("clarification") if c.get("quote_id") == old_qid
-            for q in (c["extra"].get("question_ids") or [])]
+    # Questions asked on any earlier version from this provider (a second reply
+    # finds no card on the immediately previous version).
+    qids = [q for c in approval_cards("clarification")
+            if str(c.get("quote_id") or "").rsplit("-v", 1)[0] == provider
+            for q in ((c.get("extra") or {}).get("question_ids") or [])]
     reply_id = f"R-{new_qid}"
-    for qq in dict.fromkeys(qids) or [f"Q-{old_qid}"]:
+    for qq in dict.fromkeys(qids):
         remember("remember_reply", reply_id, qq, new_qid, text=text[:2000])
     try:
         rec = recall(f"What was pending with Provider {provider} before this reply?", log=False)
