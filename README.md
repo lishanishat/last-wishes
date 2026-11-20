@@ -72,6 +72,8 @@ Money and price types are parsed from verbatim excerpts in code. Explicit option
 
 The graph uses local FastEmbed embeddings and the Turso graph provider. A real Streamlit stop/start on 2026-11-20 preserved the wishes and quotes, and recall after the reply returned the pending question and linked wishes as actual graph nodes and edges. The **Memory** tab has a counterfactual control to exclude a wish from recall.
 
+The app and the demo recording use **local Cognee only**. Cognee Cloud is not wired into this app. Manank tested Cloud separately on his own copy of the code (his `memory.cognee_check` passes, and recall in a fresh process returned the pending question and the crematory-fee resolution); that check was not run against this repository, and its data differs from ours. Any Cloud clip is a separate demonstration, not this app.
+
 ## Benchmark and Firedrill
 
 The [live benchmark](bench/results.md) hand-labels 13 source-verified lines from the fictional quotes and the separate public price list. It runs the app's SIE extract/classify pipeline and a general Qwen3.8 27B chat model on the same excerpts. SIE got **36/39 price fields** and **13/13 categories**; Qwen chat got **39/39 price fields** and **11/13 categories**. SIE missed the certificate estimate range on one isolated line; Qwen mislabeled A's unresolved crematory fee and B's alternative container. The report includes all cases, wall times, cost estimates and their limits; raw predictions and usage are in [`bench/results.json`](bench/results.json).
