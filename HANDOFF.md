@@ -37,7 +37,7 @@ The SingleStore password appeared in chat screenshots: reset it after submission
 
 ## Rehearsal 1 (live app)
 - Steps 1-5 and 8 passed.
-- `reply_A_alt` crash fixed in fb1f8ae. B $50 dropped-item fix in 0d36355.
+- `reply_A_alt` crash fixed in commit a3a024e. B $50 dropped-item fix in commit 222095b.
 - Approval #2 send was **not observed** in rehearsal 1. It is being re-run by another agent; do not state it passed until that result is in.
 
 ## Real-world benchmark
