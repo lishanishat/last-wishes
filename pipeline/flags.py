@@ -10,12 +10,12 @@ from pathlib import Path
 from typing import Optional, TypedDict
 
 from contracts import Flag, LineItem
-from pipeline.optimizer import MISSING_CREMATORY, item_savings, missing_essentials
+from pipeline.optimizer import MISSING_CREMATORY, crematory_status, held_for_requirement, item_savings
 from pipeline.wishes import (
-    RE_CASKET,
     RE_CREMATION,
     Wish,
     conflicting_wishes,
+    is_casket_requirement,
     is_crematory_fee_item,
     item_text,
 )
@@ -34,7 +34,7 @@ class FtcRef(TypedDict):
 
 # ---- FTC reference loading ---------------------------------------------------
 
-_FIELD = re.compile(r"^\s*(ID|URL|TEXT|SOURCE|TITLE)\s*[:=]\s*(.*)$", re.I)
+_FIELD = re.compile(r"^\s*(ID|URL|TEXT|SOURCE|TITLE|TOPIC)\s*[:=]\s*(.*)$", re.I)
 
 
 def parse_ftc_refs(raw: str) -> list[FtcRef]:
@@ -50,6 +50,8 @@ def parse_ftc_refs(raw: str) -> list[FtcRef]:
         current: Optional[str] = None
         loose: list[str] = []
         for line in block.splitlines():
+            if line.lstrip().startswith("#"):
+                continue  # comment / file header
             m = _FIELD.match(line)
             if m:
                 key = m.group(1).upper()
@@ -108,12 +110,6 @@ def _group(items: list[LineItem]) -> "OrderedDict[str, list[LineItem]]":
     return g
 
 
-def _is_casket_cremation_requirement(item: LineItem) -> bool:
-    text = item_text(item)
-    return item.get("category") == "stated_requirement" and bool(RE_CASKET.search(text)) \
-        and bool(RE_CREMATION.search(text))
-
-
 def review_flags(items: list[LineItem], wishes: list[Wish], ftc_refs: list[FtcRef]) -> list[Flag]:
     """Evidence-driven review flags for one or more quotes (items may mix quotes).
 
@@ -122,7 +118,7 @@ def review_flags(items: list[LineItem], wishes: list[Wish], ftc_refs: list[FtcRe
     stated_requirement - provider says a casket is required for cremation
     """
     ref_itemized = find_ref(ftc_refs, r"itemiz", r"price list", r"general price")
-    ref_choose = find_ref(ftc_refs, r"only (?:the )?(?:goods|items|services)", r"choose", r"itemiz")
+    ref_choose = find_ref(ftc_refs, r"buy only", r"only (?:the )?(?:goods|items|services|funeral)", r"choose", r"itemiz")
     ref_container = find_ref(ftc_refs, r"alternative container", r"unfinished wood", r"container")
 
     wish_text = {w["wish_id"]: w["text"] for w in wishes}
@@ -144,9 +140,10 @@ def review_flags(items: list[LineItem], wishes: list[Wish], ftc_refs: list[FtcRe
 
         # 1. unresolved_charge
         unresolved_ids: set[str] = set()
-        if wants_cremation and MISSING_CREMATORY in missing_essentials(q_items):
+        status = crematory_status(q_items) if wants_cremation else "n/a"
+        if status in ("unpriced", "missing"):
             named = [i for i in q_items if is_crematory_fee_item(i)]
-            if named:  # listed but unpriced
+            if status == "unpriced":  # listed but unpriced: one flag per listed item
                 for it in named:
                     unresolved_ids.add(it["item_id"])
                     add(quote_id, provider, it["item_id"], "unresolved_charge", it.get("excerpt", ""),
@@ -167,6 +164,8 @@ def review_flags(items: list[LineItem], wishes: list[Wish], ftc_refs: list[FtcRe
         for it in q_items:
             if it.get("category") not in ("optional", "package"):
                 continue
+            if held_for_requirement(it, q_items):
+                continue  # casket under a stated requirement: the stated_requirement flag covers it
             conflicts = conflicting_wishes(it, wishes)
             if not conflicts:
                 continue
@@ -179,7 +178,7 @@ def review_flags(items: list[LineItem], wishes: list[Wish], ftc_refs: list[FtcRe
 
         # 3. stated_requirement (casket required for cremation)
         for it in q_items:
-            if _is_casket_cremation_requirement(it):
+            if is_casket_requirement(it):
                 add(quote_id, provider, it["item_id"], "stated_requirement", it.get("excerpt", ""),
                     format_ref(ref_container), STATED_REQUIREMENT_MESSAGE)
 

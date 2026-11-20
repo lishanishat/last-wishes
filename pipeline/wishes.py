@@ -110,6 +110,22 @@ def covers_crematory_fee(item: LineItem) -> bool:
     return False
 
 
+def is_casket_item(item: LineItem) -> bool:
+    """A casket offered for sale (not a provider statement, not an alternative container)."""
+    return item.get("category") != "stated_requirement" and extra_kind(item) == "casket"
+
+
+def is_casket_requirement(item: LineItem) -> bool:
+    """Provider statement that a casket is required for cremation."""
+    text = item_text(item)
+    return item.get("category") == "stated_requirement" and bool(RE_CASKET.search(text)) \
+        and bool(RE_CREMATION.search(text))
+
+
+def has_casket_requirement(items: Iterable[LineItem]) -> bool:
+    return any(is_casket_requirement(i) for i in items)
+
+
 def offers_cremation(items: Iterable[LineItem]) -> bool:
     return any(RE_CREMATION.search(item_text(i)) for i in items)
 
@@ -141,12 +157,46 @@ def _make(kind: WishKind, text: str, source_id: str, value: Optional[float] = No
     return {"wish_id": WISH_IDS[kind], "text": text, "source_id": source_id, "kind": kind, "value": value}
 
 
-def parse_wishes(text: str, source_id: str) -> list[Wish]:
+_RE_HEADER = re.compile(r"^\s*(?:#|FICTIONAL\b|[-\u2014\u2013]{1,2}\s*\S+\s*\S*\s*$|[A-Z][A-Z /]{1,30}:\s)")
+_RE_SOURCE = re.compile(r"^\s*SOURCE:\s*(\S+)", re.M)
+
+
+def body_text(text: str) -> str:
+    """Drop comment lines ('#'), 'FICTIONAL ...' banners, 'KEY: value' header lines and
+    a dash signature; join wrapped lines; keep bullets as separate lines."""
+    lines: list[str] = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line:
+            lines.append("")
+            continue
+        if _RE_HEADER.match(line):
+            continue
+        bullet = re.match(r"^[-*\u2022]\s+(.*)$", line)
+        if bullet:
+            lines.append(bullet.group(1))
+        elif lines and lines[-1]:
+            lines[-1] += " " + line
+        else:
+            lines.append(line)
+    return "\n".join(l.strip() for l in lines if l.strip())
+
+
+def source_id_from(text: str) -> Optional[str]:
+    m = _RE_SOURCE.search(text)
+    return m.group(1) if m else None
+
+
+def parse_wishes(text: str, source_id: Optional[str] = None) -> list[Wish]:
     """Detect the four supported wish kinds in free text (keyword rules, no LLM).
 
-    Each wish keeps the sentence it came from as its text.
+    Header/comment lines are ignored; each wish keeps the person's own sentence as
+    its text. If source_id is omitted, the file's 'SOURCE:' header is used.
     """
-    sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+|\n+", text) if s.strip()]
+    source_id = source_id or source_id_from(text) or "unknown-source"
+    sentences = [s.strip().strip('"\u201c\u201d').strip()
+                 for s in re.split(r"(?<=[.!?])\s+|\n+", body_text(text))]
+    sentences = [s for s in sentences if s]
     found: dict[str, Wish] = {}
     for s in sentences:
         low = s.lower()

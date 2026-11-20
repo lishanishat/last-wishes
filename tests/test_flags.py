@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pipeline.flags import STATED_REQUIREMENT_MESSAGE, load_ftc_refs, parse_ftc_refs, review_flags
-from tests.test_optimizer import li, quote_a, quote_b, quote_c, wishes
+from tests.test_optimizer import li, quote_a, quote_a_seed, quote_b, quote_c, quote_c_seed, seed_wishes, wishes
 
 FTC_RAW = """\
 ID: FTC-ALT-CONTAINER
@@ -97,3 +97,47 @@ def test_no_legal_verdict_words():
 def test_flag_shape():
     for f in review_flags(all_items(), wishes(), refs()):
         assert set(f) == {"flag_id", "quote_id", "item_id", "kind", "excerpt", "reference", "message"}
+
+
+def test_issue1_listed_unpriced_crematory_single_flag():
+    flags = review_flags(quote_a_seed(), seed_wishes(), refs())
+    assert [(f["kind"], f["item_id"], f["message"]) for f in flags] == [
+        ("unresolved_charge", "A-03", "Needs clarification: Crematory charges has no stated price.")]
+
+
+def test_issue2_flag_messages_use_real_wish_text():
+    flags = review_flags(quote_c_seed(), seed_wishes(), refs())
+    ns = [f for f in flags if f["kind"] == "not_selected"]
+    assert ns and all("#" not in f["message"] and "Wish IDs" not in f["message"] for f in ns)
+    assert 'W3: "Please avoid unnecessary extras."' in ns[0]["message"]
+
+
+def test_issue3_no_not_selected_for_casket_under_requirement():
+    flags = review_flags(quote_c_seed(), seed_wishes(), refs())
+    assert "C-03" not in {f["item_id"] for f in flags if f["kind"] == "not_selected"}
+    sr = [f for f in flags if f["kind"] == "stated_requirement"]
+    assert len(sr) == 1 and sr[0]["item_id"] == "C-05"
+
+
+def test_issue4_statement_not_flagged_as_unresolved_charge():
+    flags = review_flags(quote_c_seed(), seed_wishes(), refs())
+    assert not [f for f in flags if f["kind"] == "unresolved_charge"]
+
+
+def test_ftc_file_with_comment_header_and_topic():
+    raw = "# FTC excerpts\n# Format: entries separated by ---\n\n---\nID: FTC-1\nTOPIC: alternative container\n" \
+          "URL: https://consumer.ftc.gov/articles/ftc-funeral-rule\nTEXT: alternative containers are available.\n"
+    r = parse_ftc_refs(raw)
+    assert r == [{"id": "FTC-1", "text": "alternative containers are available.",
+                  "url": "https://consumer.ftc.gov/articles/ftc-funeral-rule"}]
+
+
+def test_real_ftc_reference_file_if_present():
+    import pathlib
+    path = pathlib.Path(__file__).resolve().parents[1] / "data" / "ftc_reference.txt"
+    if not path.exists():
+        return
+    r = load_ftc_refs(path)
+    assert all(not x["text"].startswith("#") for x in r)
+    f = [f for f in review_flags(quote_c_seed(), seed_wishes(), r) if f["kind"] == "stated_requirement"][0]
+    assert "alternative containers" in f["reference"] and "consumer.ftc.gov" in f["reference"]

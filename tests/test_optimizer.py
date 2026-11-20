@@ -86,7 +86,7 @@ def test_parse_wishes_ids_and_budget():
 def test_plan_shape_matches_contract():
     p = plan_for_quote("B-v1", quote_b(), wishes())
     assert set(p) == {"plan_id", "quote_id", "items", "known_total", "estimated_low", "estimated_high",
-                      "unresolved", "not_needed", "wishes_satisfied"}
+                      "unresolved", "not_needed", "wishes_satisfied", "notes"}
 
 
 def test_a_unresolved_never_zero_and_never_chosen():
@@ -99,7 +99,8 @@ def test_a_unresolved_never_zero_and_never_chosen():
     # A is the lowest headline but must not be chosen
     assert a["known_total"] < chosen["known_total"]
     assert chosen["quote_id"] != "A-v1"
-    assert plans[-1]["quote_id"] == "A-v1"     # resolved plans rank first
+    assert [p["quote_id"] for p in plans][0] == "B-v1"   # resolved plans rank first
+    assert {p["quote_id"] for p in plans[1:]} == {"A-v1", "C-v1"}
 
 
 def test_b_baseline_chosen():
@@ -122,7 +123,9 @@ def test_c_not_needed_with_savings_and_casket_kept():
     assert "C-06" in p["items"]
     assert p["known_total"] == 1295.0 + 795.0 + 1495.0
     assert "W3" not in p["wishes_satisfied"]
-    assert any("clarification" in n for n in plan_notes(p, quote_c(), wishes()))
+    assert any("under review" in n for n in plan_notes(p, quote_c(), wishes()))
+    assert p["notes"] == plan_notes(p, quote_c(), wishes())
+    assert p["unresolved"] == ["C: alternative container (price not quoted)"]
 
 
 def test_open_ended_starting_at_gives_none_high():
@@ -194,3 +197,111 @@ def test_match_items_by_name_not_id():
     pairs = match_items(quote_b(), [li("Z-77", "Basic Services of the Funeral Director & Staff", "basic_fee",
                                       "fixed", 995.0, 995.0, "x")])
     assert len(pairs) == 1 and pairs[0][0]["item_id"] == "B-01"
+
+
+# ---- fixtures mirroring data/ seed files (issues found on real seed data) ---
+
+WISHES_FILE = """FICTIONAL PERSON \u2014 for demo. Linda is not a real person.
+# Wish IDs derived from this note: W1 cremation \u00b7 W2 no public viewing \u00b7 W3 avoid unnecessary extras
+# (W4 budget comes from confirmation_daughter.txt)
+
+SOURCE: W-NOTE-1
+TYPE: Recorded note (voice memo, transcribed)
+SPEAKER: Linda Marsh, age 78
+
+"Keep it simple. Cremation, no public viewing. Please avoid unnecessary extras."
+"""
+
+CONFIRM_FILE = """FICTIONAL PERSON \u2014 for demo. Maya is not a real person.
+# Confirms W1, W2, W3 from W-NOTE-1 and adds W4 (working budget about $4,000).
+
+SOURCE: W-CONF-1
+FROM: Maya Marsh, daughter
+REFERS TO: W-NOTE-1
+
+I have listened to Mom's recorded note and I confirm these are her wishes:
+
+- She wanted cremation.
+- She did not want a public viewing.
+
+Our family's working budget for the arrangements is about $4,000. We would
+like to choose only the services that match what Mom asked for.
+
+\u2014 Maya Marsh
+"""
+
+
+def seed_wishes():
+    from pipeline.wishes import merge_wishes
+    return merge_wishes(parse_wishes(WISHES_FILE), parse_wishes(CONFIRM_FILE))
+
+
+def quote_a_seed():
+    return [
+        li("A-01", "Basic services of funeral director and staff", "basic_fee", "fixed", 895.0, 895.0,
+           "| Basic services of funeral director and staff | $895.00 | Non-declinable |"),
+        li("A-02", "Alternative container (fiberboard)", "optional", "fixed", 75.0, 75.0,
+           "| Alternative container (fiberboard) | $75.00 |"),
+        li("A-03", "Crematory charges", "basic_fee", "unknown", None, None,
+           "| Crematory charges | TBC | To be confirmed |"),
+    ]
+
+
+def quote_c_seed():
+    return [
+        li("C-01", "Basic services of funeral director and staff", "basic_fee", "fixed", 1350.0, 1350.0,
+           "Basic services of funeral director and staff \u2014 $1,350.00"),
+        li("C-02", "Embalming", "package", "fixed", 795.0, 795.0, "Embalming \u2014 $795"),
+        li("C-03", "Cremation casket, oak finish", "optional", "fixed", 1895.0, 1895.0,
+           "Cremation casket, oak finish \u2014 $1,895.00"),
+        li("C-04", "Crematory fee", "basic_fee", "fixed", 375.0, 375.0, "Crematory fee \u2014 $375"),
+        li("C-05", "Casket requirement", "stated_requirement", "unknown", None, None,
+           "A casket purchase is required for direct cremation."),
+        li("C-06", "Upgraded urn", "optional", "unknown", None, None,
+           "Upgraded urns are available from our selection room."),
+    ]
+
+
+def test_issue1_one_unresolved_entry_for_listed_unpriced_crematory():
+    p = plan_for_quote("A-v1", quote_a_seed(), seed_wishes())
+    assert p["unresolved"] == ["A: Crematory charges"]
+
+
+def test_issue2_wish_text_ignores_headers():
+    ws = seed_wishes()
+    assert [w["wish_id"] for w in ws] == ["W1", "W2", "W3", "W4"]
+    for w in ws:
+        assert not w["text"].startswith("#")
+        assert "FICTIONAL" not in w["text"] and "SOURCE" not in w["text"] and "Wish IDs" not in w["text"]
+    assert ws[0]["text"] == "Cremation, no public viewing." and ws[0]["source_id"] == "W-NOTE-1"
+    assert ws[2]["text"] == "Please avoid unnecessary extras."
+    assert ws[3]["source_id"] == "W-CONF-1" and ws[3]["value"] == 4000.0
+    assert ws[3]["text"] == "Our family's working budget for the arrangements is about $4,000."
+
+
+def test_issue3_casket_kept_under_stated_requirement():
+    p = plan_for_quote("C-v1", quote_c_seed(), seed_wishes())
+    assert "C-03" in p["items"]
+    assert "C-03" not in {n["item_id"] for n in p["not_needed"]}
+    assert "C: alternative container (price not quoted)" in p["unresolved"]
+    assert p["known_total"] == 1350.0 + 1895.0 + 375.0
+    assert any("Cremation casket, oak finish" in n for n in p["notes"])
+
+
+def test_issue4_statement_is_not_an_unresolved_charge():
+    p = plan_for_quote("C-v1", quote_c_seed(), seed_wishes())
+    assert p["unresolved"] == ["C: alternative container (price not quoted)"]
+    assert not any("Casket requirement" in u for u in p["unresolved"])
+
+
+def test_unknown_price_exclusion_listed_with_none_savings():
+    p = plan_for_quote("C-v1", quote_c_seed(), seed_wishes())
+    nn = {n["item_id"]: n["savings"] for n in p["not_needed"]}
+    assert nn == {"C-02": 795.0, "C-06": None}
+
+
+def test_priced_alt_container_resolves_casket_requirement_entry():
+    items = quote_c_seed() + [li("C-07", "Alternative container (cardboard)", "optional", "fixed",
+                                 95.0, 95.0, "Alternative container $95")]
+    p = plan_for_quote("C-v2", items, seed_wishes())
+    assert p["unresolved"] == []

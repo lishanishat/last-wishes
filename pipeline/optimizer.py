@@ -12,11 +12,15 @@ from typing import Optional
 
 from contracts import LineItem, NotNeeded, Plan
 from pipeline.wishes import (
+    RE_ALT_CONTAINER,
     Wish,
     conflicting_wishes,
     covers_crematory_fee,
     extra_kind,
+    has_casket_requirement,
     has_known_price,
+    is_casket_item,
+    is_crematory_fee_item,
     is_cremation_service,
     is_viewing,
     offers_cremation,
@@ -25,6 +29,7 @@ from pipeline.wishes import (
 
 MAX_BRUTE_FORCE = 16  # optional items enumerated exhaustively up to this many
 MISSING_CREMATORY = "crematory fee"
+MISSING_ALT_CONTAINER = "alternative container (price not quoted)"
 
 
 # ---- helpers ---------------------------------------------------------------
@@ -44,7 +49,8 @@ def _cost_parts(items: list[LineItem]) -> tuple[float, float, Optional[float], l
     for it in items:
         lo, hi, pt = it.get("amount_low"), it.get("amount_high"), it.get("price_type")
         if pt == "unknown" or (lo is None and hi is None):
-            unknown.append(it)
+            if it.get("category") != "stated_requirement":  # a statement is not a charge
+                unknown.append(it)
         elif pt == "fixed":
             known += float(lo if lo is not None else hi)
         elif pt == "estimated":
@@ -122,18 +128,43 @@ def budget_status(plan: Plan, wishes: list[Wish]) -> str:
                                plan["estimated_high"], plan["unresolved"], plan["estimated_low"])
 
 
-def missing_essentials(items: list[LineItem]) -> list[str]:
-    """Essential services for cremation that the quote does not price.
-
-    A quote that offers cremation must price the crematory charge: either an item
-    named crematory fee with a known price, or a priced item that states it
-    includes the crematory. Otherwise 'crematory fee' is missing.
-    """
+def crematory_status(items: list[LineItem]) -> str:
+    """'ok' (priced or stated as included), 'unpriced' (listed, no price),
+    'missing' (not listed at all), or 'n/a' (quote does not offer cremation)."""
     if not offers_cremation(items):
-        return []
+        return "n/a"
     if any(covers_crematory_fee(i) for i in items):
-        return []
-    return [MISSING_CREMATORY]
+        return "ok"
+    if any(is_crematory_fee_item(i) for i in items):
+        return "unpriced"
+    return "missing"
+
+
+def _alt_container_priced(items: list[LineItem]) -> bool:
+    return any(RE_ALT_CONTAINER.search(i.get("name") or "") and has_known_price(i)
+               and i.get("category") != "stated_requirement" for i in items)
+
+
+def missing_essentials(items: list[LineItem]) -> list[str]:
+    """Charges the plan needs but the quote does not list (one entry per charge).
+
+    - 'crematory fee' when a cremation quote does not list a crematory charge at all
+      (a listed-but-unpriced one is already unresolved under its own name).
+    - 'alternative container (price not quoted)' when the provider states a casket is
+      required for cremation and quotes no priced alternative container.
+    """
+    out: list[str] = []
+    if crematory_status(items) == "missing":
+        out.append(MISSING_CREMATORY)
+    if has_casket_requirement(items) and not _alt_container_priced(items):
+        out.append(MISSING_ALT_CONTAINER)
+    return out
+
+
+def held_for_requirement(item: LineItem, items: list[LineItem]) -> bool:
+    """Casket items stay in the plan while a stated casket requirement is under review
+    (spec §4: do not auto-remove the charge)."""
+    return is_casket_item(item) and has_casket_requirement(items)
 
 
 # ---- planning --------------------------------------------------------------
@@ -147,7 +178,9 @@ def plan_for_quote(quote_id: str, items: list[LineItem], wishes: list[Wish]) -> 
 
     for it in items:
         conflicts = conflicting_wishes(it, wishes)
-        if _removable(it):
+        if held_for_requirement(it, items):
+            fixed_in.append(it)
+        elif _removable(it):
             if conflicts:
                 excluded_conflicts.append(it)
             else:
@@ -184,11 +217,10 @@ def plan_for_quote(quote_id: str, items: list[LineItem], wishes: list[Wish]) -> 
     for it in items:
         if it["item_id"] in chosen_ids:
             continue
-        s = item_savings(it)
-        if s is not None:  # unknown savings are never reported as a number
-            not_needed.append({"item_id": it["item_id"], "savings": s})
+        # savings None = price unknown (never reported as zero)
+        not_needed.append({"item_id": it["item_id"], "savings": item_savings(it)})
 
-    return {
+    plan: Plan = {
         "plan_id": f"plan-{quote_id}",
         "quote_id": quote_id,
         "items": [i["item_id"] for i in items if i["item_id"] in chosen_ids],
@@ -198,7 +230,10 @@ def plan_for_quote(quote_id: str, items: list[LineItem], wishes: list[Wish]) -> 
         "unresolved": unresolved,
         "not_needed": not_needed,
         "wishes_satisfied": met,
+        "notes": [],
     }
+    plan["notes"] = plan_notes(plan, items, wishes)
+    return plan
 
 
 def plan_rank_key(plan: Plan, wishes: list[Wish]):
@@ -238,7 +273,10 @@ def plan_notes(plan: Plan, items: list[LineItem], wishes: list[Wish]) -> list[st
             continue
         conflicts = conflicting_wishes(it, wishes)
         if it.get("category") == "stated_requirement":
-            notes.append(f"{it['name']} is kept pending the provider's clarification of this stated requirement.")
+            notes.append(f"Provider statement under review: \"{it.get('excerpt') or it['name']}\"")
+        elif held_for_requirement(it, items):
+            notes.append(f"{it['name']} is kept until the provider clarifies its casket requirement "
+                         f"and quotes an alternative container.")
         elif conflicts:
             notes.append(f"{it['name']} is part of a package and has no separate price, so it cannot be removed "
                          f"(conflicts with {', '.join(conflicts)}).")
