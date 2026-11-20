@@ -1,10 +1,13 @@
 """SIE classify of LineItems into contracts.CATEGORIES (LAST_WISHES.md §8 step 3).
 
 Uses ``pipeline.sie_client.classify`` (fastino/GLiNER2.5-Decide, single-choice question).
-The category is the model's top label; no LLM and no keyword override decides it, so the
-casket flag in flags.py rests on SIE classify + a code rule, as the spec requires.
+An explicit optional-service rule corrects Decide's observed false ``basic_fee`` labels
+for viewing, embalming and other declinable extras. A casket requirement flag still
+requires SIE's ``stated_requirement`` label plus the rule in flags.py.
 """
 from __future__ import annotations
+
+import re
 
 from contracts import CATEGORIES, LineItem, SIETrace
 
@@ -23,6 +26,11 @@ CRITERIA: dict[str, str] = {
 }
 assert tuple(CRITERIA) == CATEGORIES
 
+_DECLINABLE_EXTRA = re.compile(
+    r"\b(?:embalm\w*|viewing|visitation|memorial|flower\w*|floral|"
+    r"casket|cosmetology|dressing|printed folders?|ceremony)\b", re.I
+)
+
 
 def item_text(item: LineItem) -> str:
     """What the classifier reads: the verbatim excerpt (name prepended if not already in it)."""
@@ -38,6 +46,8 @@ def apply_categories(items: list[LineItem], probs: list[dict[str, float]]) -> li
         new = LineItem(**item)  # type: ignore[typeddict-item]
         if p:
             new["category"] = max(p.items(), key=lambda kv: kv[1])[0]  # type: ignore[typeddict-item]
+        if new["category"] == "basic_fee" and _DECLINABLE_EXTRA.search(new["name"]):
+            new["category"] = "optional"
         out.append(new)
     return out
 
