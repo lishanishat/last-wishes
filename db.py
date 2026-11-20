@@ -191,9 +191,10 @@ def _ddl() -> list[str]:
     excerpt_vec = f",\n  excerpt_vec VECTOR({dim}, F32)" if dim else ""
     text_vec = f",\n  text_vec VECTOR({dim}, F32)" if dim else ""
     T = "LONGTEXT" if s2 else "TEXT"
-    # outbox: ROWSTORE + SHARD KEY(idempotency_key) so the UNIQUE/PRIMARY key on
-    # idempotency_key is actually enforced cluster-wide (unique keys must contain the shard key).
-    outbox_prefix = "CREATE ROWSTORE TABLE IF NOT EXISTS" if s2 else "CREATE TABLE IF NOT EXISTS"
+    # outbox: SHARD KEY(idempotency_key) so the PRIMARY key on idempotency_key is enforced
+    # cluster-wide (unique keys must contain the shard key). Default (columnstore) table type:
+    # the free shared tier rejects CREATE ROWSTORE TABLE.
+    outbox_prefix = "CREATE TABLE IF NOT EXISTS"
     outbox_shard = ",\n  SHARD KEY (idempotency_key)" if s2 else ""
     return [
         f"""CREATE TABLE IF NOT EXISTS wishes (
@@ -240,14 +241,13 @@ def _ddl() -> list[str]:
   id VARCHAR(64) NOT NULL, ts VARCHAR(40), recipe VARCHAR(255), model VARCHAR(255),
   latency_ms INT, input_chars INT, output_json {T},
   PRIMARY KEY (id))""",
-        f"""CREATE TABLE IF NOT EXISTS ftc_reference (
-  id VARCHAR(64) NOT NULL, text {T}, url VARCHAR(1024){text_vec},
-  PRIMARY KEY (id))""",
+        # ftc_reference (spec §10) is stored as documents rows with kind='ftc_reference':
+        # the free SingleStore shared tier allows at most 10 tables per database.
     ]
 
 
 TABLES = ("wishes", "documents", "quotes", "line_items", "flags", "plans",
-          "approvals", "outbox", "audit_log", "sie_calls", "ftc_reference")
+          "approvals", "outbox", "audit_log", "sie_calls")
 
 
 def init_schema() -> None:
@@ -500,12 +500,14 @@ def list_audit(limit: int = 500) -> list[dict]:
 # --------------------------------------------------------------------------- FTC reference
 def insert_ftc_ref(text: str, url: str, ref_id: Optional[str] = None) -> str:
     ref_id = ref_id or new_id("ftc")
-    execute("INSERT INTO ftc_reference (id, text, url) VALUES (%s,%s,%s)", (ref_id, text, url))
+    execute("INSERT INTO documents (id, kind, provider, filename, is_fictional, source_url, raw_text) "
+            "VALUES (%s,%s,%s,%s,%s,%s,%s)", (ref_id, "ftc_reference", None, "ftc_reference.txt", 0, url, text))
     return ref_id
 
 
 def list_ftc_refs() -> list[dict]:
-    return query("SELECT id, text, url FROM ftc_reference ORDER BY id")
+    return query("SELECT id, raw_text AS text, source_url AS url FROM documents "
+                 "WHERE kind=%s ORDER BY id", ("ftc_reference",))
 
 
 # TODO(vectors): search_ftc(query_vec, k) / search_excerpts(query_vec, k) using
