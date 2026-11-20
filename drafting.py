@@ -163,7 +163,7 @@ def _change_sentences(diff: dict) -> list[str]:
         name = (r.get("name") or "charge").strip()
         low = name[0].lower() + name[1:] if name else name
         if r.get("status") == "resolved":
-            out.append(f"You reviewed this while the {low} was unresolved. The reply sets it at {r.get('v2')}.")
+            out.append(f"You reviewed this while the price for {low} was unresolved. The reply sets it at {r.get('v2')}.")
         elif r.get("status") == "changed":
             out.append(f"The reply changes the {low} from {r.get('v1')} to {r.get('v2')}.")
         elif r.get("status") == "added":
@@ -189,7 +189,7 @@ def explain_change(diff: dict, recall: Optional[dict] = None) -> str:
     facts_text = "\n".join(f"- {s}" for s in sentences)
     prompt = (
         "Rewrite these facts as two to four calm, plain sentences for the family. The first sentence must be "
-        "in the form: 'You reviewed this while the <charge> was unresolved. The reply sets it at <amount>.' "
+        "in the form: 'You reviewed this while the price for <charge> was unresolved. The reply sets it at <amount>.' "
         "when such a fact is present. Keep every amount exactly as written.\n\n"
         f"FACTS:\n{facts_text}\n\nMEMORY CONTEXT (do not take numbers from here):\n{memory[:800]}"
     )

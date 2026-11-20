@@ -319,6 +319,20 @@ def merge_reply(v1_items: list[dict], reply_items: list[dict], new_quote_id: str
                 key = (jac, cont, it.get("price_type") == "unknown")
                 if best_key is None or key > best_key:
                     best, best_key = idx, key
+        # SIE can name a reply line after its last phrase (for example "county's
+        # cost") even when the excerpt names the original service. Match on that
+        # verbatim excerpt before treating it as a newly added charge.
+        if best is None:
+            excerpt_tokens = normalize_name(r.get("excerpt", ""))
+            for idx, it in enumerate(v2):
+                if idx in used:
+                    continue
+                old_tokens = normalize_name(it.get("name", ""))
+                _, coverage = _match_score(old_tokens, excerpt_tokens)
+                if len(old_tokens & excerpt_tokens) >= 2 and coverage >= 0.75:
+                    key = (coverage, it.get("price_type") == "unknown")
+                    if best_key is None or key > best_key:
+                        best, best_key = idx, key
         if best is None:
             added += 1
             new = dict(r)

@@ -134,6 +134,17 @@ def test_merge_prefers_unresolved_item_and_ignores_weak_overlap():
     assert v2[1]["amount_low"] == 395.0
 
 
+def test_merge_matches_service_named_in_reply_excerpt():
+    old = [_it(1, "Certified copies of death certificate", "cash_advance", "estimated", 96.0, 96.0,
+               "Certified copies of death certificate — est. $96")]
+    reply = [_it(1, "county's cost", "cash_advance", "estimated", 96.0, 96.0,
+                 "The death certificate copies remain an estimated $96 passed through at the county's cost.")]
+    v2, changes = agent.merge_reply(old, reply, "A-v2", "A")
+    assert len(v2) == 1
+    assert v2[0]["name"] == "Certified copies of death certificate"
+    assert changes[0]["kind"] == "confirmed"
+
+
 def test_line_diff_statuses():
     reply = [dict(i, quote_id="A-v2") for i in FAKE_DOCS["reply_A_v2.txt"]]
     v2, _ = agent.merge_reply(_v1(), reply, "A-v2", "A")
