@@ -201,9 +201,12 @@ def parse_wishes(text: str, source_id: Optional[str] = None) -> list[Wish]:
     for s in sentences:
         low = s.lower()
         if "cremation" not in found and RE_CREMATION.search(s) and not re.search(r"\bno cremation|not cremat", low):
-            found["cremation"] = _make("cremation", s, source_id)
+            clause = next((part.strip() for part in s.split(",") if RE_CREMATION.search(part)), s)
+            found["cremation"] = _make("cremation", clause[0].upper() + clause[1:], source_id)
         if "no_viewing" not in found and RE_VIEWING.search(s) and re.search(r"\bno\b|\bnot\b|without|don't|do not", low):
-            found["no_viewing"] = _make("no_viewing", s, source_id)
+            clause = next((part.strip() for part in s.split(",") if RE_VIEWING.search(part)
+                           and re.search(r"\bno\b|\bnot\b|without|don't|do not", part, re.I)), s)
+            found["no_viewing"] = _make("no_viewing", clause[0].upper() + clause[1:], source_id)
         if "avoid_extras" not in found and re.search(r"extras?\b|unnecessary|keep it simple|nothing fancy", low):
             if re.search(r"avoid|no |without|unnecessary|don't|do not", low):
                 found["avoid_extras"] = _make("avoid_extras", s, source_id)

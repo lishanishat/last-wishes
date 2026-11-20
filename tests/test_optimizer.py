@@ -273,7 +273,8 @@ def test_issue2_wish_text_ignores_headers():
     for w in ws:
         assert not w["text"].startswith("#")
         assert "FICTIONAL" not in w["text"] and "SOURCE" not in w["text"] and "Wish IDs" not in w["text"]
-    assert ws[0]["text"] == "Cremation, no public viewing." and ws[0]["source_id"] == "W-NOTE-1"
+    assert ws[0]["text"] == "Cremation" and ws[0]["source_id"] == "W-NOTE-1"
+    assert ws[1]["text"] == "No public viewing."
     assert ws[2]["text"] == "Please avoid unnecessary extras."
     assert ws[3]["source_id"] == "W-CONF-1" and ws[3]["value"] == 4000.0
     assert ws[3]["text"] == "Our family's working budget for the arrangements is about $4,000."
