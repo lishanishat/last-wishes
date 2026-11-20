@@ -1,0 +1,22 @@
+FICTIONAL PROVIDER — for demo. "Harborview Cremation Services" is not a real business.
+
+HARBORVIEW CREMATION SERVICES
+Statement of Funeral Goods and Services Selected
+Prepared for: Marsh family
+Date: November 18, 2026
+Arrangement: Direct cremation
+
+| Item                                              | Price      | Notes                              |
+|---------------------------------------------------|------------|------------------------------------|
+| Basic services of funeral director and staff      | $895.00    | Non-declinable                     |
+| Transfer of remains to funeral home               | $350.00    | Within 25 miles                    |
+| Refrigeration / sheltering of remains             | $150.00    | Up to 7 days                       |
+| Alternative container (fiberboard)                | $75.00     |                                    |
+| Certified copies of death certificate             | est. $96   | Cash advance; 4 copies, county fee |
+| Crematory charges                                 | TBC        | To be confirmed                    |
+
+Quoted total: $1,470.00
+(Total shown excludes cash advance items. Crematory charges: to be confirmed.)
+
+Cremated remains are returned in a temporary container.
+Prices valid for 30 days. Questions: arrangements@harborview-cremation.example
