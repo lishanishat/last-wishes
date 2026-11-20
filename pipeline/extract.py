@@ -367,7 +367,14 @@ def build_items(
             prev = items[seen[key]]
             if prev["price_type"] == "unknown" and price_type != "unknown":
                 prev.update(price_type=price_type, amount_low=low, amount_high=high, excerpt=t, confidence=conf)
-            continue
+                continue
+            if prev["excerpt"] == t or (prev["amount_low"], prev["amount_high"]) == (low, high):
+                continue  # the same item mentioned again
+            # Same short SIE name on a different service with a different price (e.g. "cremation"
+            # for both the container and the medical examiner authorization): keep both.
+            alt = re.sub(r"\s+", " ", fallback_name(t)).strip()
+            name = alt if _norm(alt) not in seen else f"{name} ({len(items) + 1})"
+            key = _norm(name)
         seen[key] = len(items)
         items.append(
             LineItem(

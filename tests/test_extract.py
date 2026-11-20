@@ -203,3 +203,14 @@ def test_sie_client_with_fake_sdk(monkeypatch):
     assert probs == [{"optional": 0.7, "package": 0.3}] and tr[0]["recipe"] == "classify"
     ranked, tr = sie_client.rerank("q", ["a", "b"])
     assert ranked[0] == (1, 0.9) and tr["recipe"] == "rerank"
+
+
+def test_same_sie_name_for_different_priced_services_keeps_both():
+    from pipeline.extract import segment
+    text = open("data/quote_B.txt", encoding="utf-8").read()
+    segs = segment(text)
+    ents = [[{"text": "cremation", "label": "fee or charge", "score": 0.9}]
+            if ("alternative container" in s.text or "medical examiner" in s.text) else [] for s in segs]
+    items = build_items(text, "quote_B.txt", "B-v1", ents, segs)
+    amounts = sorted(i["amount_low"] for i in items if i["amount_low"] is not None)
+    assert 95.0 in amounts and 50.0 in amounts
