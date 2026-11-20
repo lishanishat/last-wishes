@@ -10,8 +10,8 @@ Record the live app. Keep the providers marked fictional, show the actual SIE tr
 | 1:00–1:20 | Approvals | “Maya reviews one exact clarification message and recipient. The sandbox outbox sends that approved message once.” |
 | 1:20–1:55 | Stop and restart Streamlit → Inbox → Memory → Diff | “After a real restart, A's reply arrives. Cognee recalls the question, quote, and wishes through returned graph nodes and edges. SIE reads the new fee and revised refrigeration price. A-v2 supersedes A-v1; the unchanged certificate estimate is not counted twice. Here is the line-by-line change and new plan.” |
 | 1:55–2:20 | Approvals + Persona | “Maya selects the version she wants. Persona sandbox verifies who is approving, not her legal authority. She reviews the exact services, quote version, totals, and recipient, then approves a separate arrangement request. The app does not pay. The provider still has to confirm.” |
-| 2:20–2:30 | Trace and benchmark, if available | “These are the SIE recipe/model traces and the complete benchmark results, including misses.” |
+| 2:20–2:30 | Trace and benchmark | “These are the SIE recipe/model traces and the complete 13-line benchmark results, including misses.” |
 
 Closing line: **“Here's what Linda wanted, what the quotes actually include, and what changed after her family asked.”**
 
-Before recording, check that the Persona sandbox inquiry can reach `approved` and Approval #2 can send. If the benchmark or Firedrill results have not arrived, do not narrate them as completed. Label any cached footage **recorded replay**.
+Before recording, check that the Persona sandbox inquiry can reach `approved` and Approval #2 can send. Firedrill platform results have not arrived; do not narrate them as completed. Label any cached footage **recorded replay**.

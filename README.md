@@ -74,7 +74,7 @@ The graph uses local FastEmbed embeddings and the Turso graph provider. A real S
 
 ## Benchmark and Firedrill
 
-The planned benchmark hand-labels 10–20 items from the fictional quotes and the separate public price list, then compares SIE extract/classify with one general LLM on the same text. It reports field accuracy, category accuracy, latency, and estimated cost, including losses. **Results have not been delivered or run yet.** When available, the complete table belongs in `bench/results.md`.
+The [live benchmark](bench/results.md) hand-labels 13 source-verified lines from the fictional quotes and the separate public price list. It runs the app's SIE extract/classify pipeline and a general Qwen3.8 27B chat model on the same excerpts. SIE got **36/39 price fields** and **13/13 categories**; Qwen chat got **39/39 price fields** and **11/13 categories**. SIE missed the certificate estimate range on one isolated line; Qwen mislabeled A's unresolved crematory fee and B's alternative container. The report includes all cases, wall times, cost estimates and their limits; raw predictions and usage are in [`bench/results.json`](bench/results.json).
 
 Firedrill's planned scenarios are approval invalidation after a quote change, send failure/retry without duplicate delivery, and extraction from the differently worded reply. **Firedrill results have not been run yet**; report a “passed X of Y” count in `tests/firedrill/results.md` once the quickstart and scenarios are available. The repository's ordinary offline tests cover these safety paths separately.
 
