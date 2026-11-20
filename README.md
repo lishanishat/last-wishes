@@ -16,7 +16,7 @@ python3.12 -m venv .venv
 cp .env.example .env
 ```
 
-Fill `.env` with the service credentials you have. `SINGLESTORE_URL` uses the SingleStore connection string. `SIE_API_KEY` is required for live quote extraction; `SIE_BASE_URL` defaults to `https://api.superlinked.com`. `LLM_API_KEY` enables Cognee's `add`/`cognify` semantic path; `ANTHROPIC_API_KEY` enables optional drafted wording. `PERSONA_API_KEY` and `PERSONA_TEMPLATE_ID` must be sandbox credentials for the identity gate. Never commit `.env` or paste keys into issues, logs, or screenshots.
+Fill `.env` with the service credentials you have. `SINGLESTORE_URL` uses the SingleStore connection string. `SIE_API_KEY` is required for live quote extraction; `SIE_BASE_URL` defaults to `https://api.superlinked.com`. `LLM_API_KEY` enables Cognee's `add`/`cognify` semantic path; `ANTHROPIC_API_KEY` enables optional drafted wording. `PERSONA_API_KEY` and `PERSONA_TEMPLATE_ID` must be sandbox credentials for the identity gate. `.env.example` also lists the optional overrides the code reads (`LLM_MODEL`, `LW_COGNIFY`, `LW_DB`, `LW_SQLITE_PATH`, `LW_VECTOR_DIM`, `SIE_WAIT_S`, `PERSONA_VERSION`). Never commit `.env` or paste keys into issues, logs, or screenshots.
 
 ```bash
 .venv/bin/python -m pytest -q
@@ -68,7 +68,7 @@ Money and price types are parsed from verbatim excerpts in code. Explicit option
 
 ## Cognee memory
 
-`memory/cognee_mem.py` writes typed `Person`, `FamilyMember`, `Wish`, `Document`, `Provider`, `Quote`, `LineItem`, `Question`, `Reply`, and `Plan` data points and their links through Cognee's graph APIs. Its public calls are `remember_wish`, `remember_confirmation`, `remember_quote`, `remember_question`, `remember_reply`, `remember_plan`, `recall`, `graph_snapshot`, and `reset_memory`. `recall` calls `cognee.search` with `GRAPH_COMPLETION` and `only_context=True`, and returns the actual nodes and edges. With `LLM_API_KEY`, raw text is also queued through `cognee.add` and `cognee.cognify`; that LLM path requires separate live verification.
+`memory/cognee_mem.py` writes typed `Person`, `FamilyMember`, `Wish`, `Document`, `Provider`, `Quote`, `LineItem`, `Question`, `Reply`, and `Plan` data points and their links through Cognee's graph APIs. Its public calls are `remember_wish`, `remember_confirmation`, `remember_quote`, `remember_question`, `remember_reply`, `remember_plan`, `recall`, `graph_snapshot`, and `reset_memory`. `recall` calls `cognee.search` with `GRAPH_COMPLETION` and `only_context=True`, and returns the actual nodes and edges. Memory is written with `cognee.tasks.storage.add_data_points`, and `reset_memory` uses `cognee.prune`. With `LLM_API_KEY`, raw text is also queued through `cognee.add` and `cognee.cognify`, and `recall` asks Cognee's LLM gateway for a short answer over the returned context; without a key, recall returns the nodes, edges, and a graph-only answer. **Not verified live:** the LLM `add`/`cognify` layer and the LLM-written recall answer (no LLM key was set when we tested). The nodes and edges shown in the Memory tab come from the typed data points and `cognee.search`, which were verified.
 
 The graph uses local FastEmbed embeddings and the Turso graph provider. A real Streamlit stop/start on 2026-11-20 preserved the wishes and quotes, and recall after the reply returned the pending question and linked wishes as actual graph nodes and edges. The **Memory** tab has a counterfactual control to exclude a wish from recall.
 
@@ -77,6 +77,15 @@ The graph uses local FastEmbed embeddings and the Turso graph provider. A real S
 The [live benchmark](bench/results.md) hand-labels 13 source-verified lines from the fictional quotes and the separate public price list. It runs the app's SIE extract/classify pipeline and a general Qwen3.8 27B chat model on the same excerpts. SIE got **36/39 price fields** and **13/13 categories**; Qwen chat got **39/39 price fields** and **11/13 categories**. SIE missed the certificate estimate range on one isolated line; Qwen mislabeled A's unresolved crematory fee and B's alternative container. The report includes all cases, wall times, cost estimates and their limits; raw predictions and usage are in [`bench/results.json`](bench/results.json).
 
 Firedrill's six scenarios were run by Manank against his own copy of the pipeline and data, not against this repository's app. The platform run covered two of the six: **2 of 2 met the threshold of 75**, with scores of **98.25** (a differently worded reply still yields the crematory charge) and **94.5** (casket flag wording avoids "illegal" and "violation"). See [`tests/firedrill/PLATFORM_SCORES.md`](tests/firedrill/PLATFORM_SCORES.md) (campaign `8a1c6958-7bd5-43fc-89b5-d6d5f8b36ce8`). The other four scenarios ran only as local tests, so they are not platform results. The platform's own state still read "running" when last checked, though both drills showed completed. Limits: the agent under test used the local deterministic parser, and the approval and outbox drills used a stand-in, so they say nothing about this repository's `approvals.py` and `outbox.py`. Those safety paths are covered by this repository's own offline tests (`tests/test_approvals.py`, `tests/test_outbox.py`).
+
+## Not verified live
+
+- **LLM drafts:** without `ANTHROPIC_API_KEY`, drafted wording is a labeled template. Drafting with a real model was not run live.
+- **Cognee LLM layer:** `cognee.add`/`cognee.cognify` and the LLM-written recall answer were not run live (see Cognee memory). The graph itself and recall of real nodes/edges were.
+- **Persona:** the sandbox inquiry and the "Simulate approval (sandbox only)" step are covered by offline tests; the live Persona test is skipped unless enabled, and a live end-to-end sandbox approval was not confirmed in the committed docs at the time of writing. Completing the hosted flow reports `completed`, not `approved`.
+- **Firedrill:** only 2 of 6 scenarios ran on the platform, against a copy of the pipeline (see above).
+- **Real price list:** extraction output from the public PDF is a test only and includes price-less guidance sentences as candidates.
+- Anything not stated as verified above should be treated as untested.
 
 ## Sources and limits
 
