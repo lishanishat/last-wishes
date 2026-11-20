@@ -1,0 +1,15 @@
+[
+  {"id":"A-basic","source":"data/quote_A.txt","text":"| Basic services of funeral director and staff      | $895.00    | Non-declinable                     |","category":"basic_fee","price_type":"fixed","amount_low":895,"amount_high":895},
+  {"id":"A-unresolved","source":"data/quote_A.txt","text":"| Crematory charges                                 | TBC        | To be confirmed                    |","category":"basic_fee","price_type":"unknown","amount_low":null,"amount_high":null},
+  {"id":"B-crematory","source":"data/quote_B.txt","text":"The crematory fee is $350.00.","category":"basic_fee","price_type":"fixed","amount_low":350,"amount_high":350},
+  {"id":"B-container","source":"data/quote_B.txt","text":"an alternative container made of corrugated fiberboard, which is $95.00.","category":"basic_fee","price_type":"fixed","amount_low":95,"amount_high":95},
+  {"id":"C-embalming","source":"data/quote_C.txt","text":"Embalming — $795","category":"optional","price_type":"fixed","amount_low":795,"amount_high":795},
+  {"id":"C-viewing","source":"data/quote_C.txt","text":"Public viewing / visitation, one evening (up to 3 hours) — $650.00","category":"optional","price_type":"fixed","amount_low":650,"amount_high":650},
+  {"id":"C-flowers","source":"data/quote_C.txt","text":"Floral arrangement (casket spray) — starting at $350","category":"optional","price_type":"starting_at","amount_low":350,"amount_high":null},
+  {"id":"C-casket","source":"data/quote_C.txt","text":"Cremation casket, oak finish — $1,895.00","category":"optional","price_type":"fixed","amount_low":1895,"amount_high":1895},
+  {"id":"C-certificates","source":"data/quote_C.txt","text":"Certified copies of death certificate (cash advance) — $24 per copy, est. $48–$96","category":"cash_advance","price_type":"estimated","amount_low":48,"amount_high":96},
+  {"id":"C-package","source":"data/quote_C.txt","text":"Celebration Package price: $6,495.00 (death certificate copies billed separately)","category":"package","price_type":"fixed","amount_low":6495,"amount_high":6495},
+  {"id":"C-requirement","source":"data/quote_C.txt","text":"A casket purchase is required for direct cremation.","category":"stated_requirement","price_type":"unknown","amount_low":null,"amount_high":null},
+  {"id":"GPL-basic","source":"data/real_gpl.pdf","text":"Basic Services $2,195","category":"basic_fee","price_type":"fixed","amount_low":2195,"amount_high":2195},
+  {"id":"GPL-crematory","source":"data/real_gpl.pdf","text":"Crematory Fee (Irvington) $695","category":"basic_fee","price_type":"fixed","amount_low":695,"amount_high":695}
+]

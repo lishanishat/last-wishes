@@ -1,0 +1,574 @@
+[
+  {
+    "id": "A-basic",
+    "source": "data/quote_A.txt",
+    "text": "| Basic services of funeral director and staff      | $895.00    | Non-declinable                     |",
+    "gold": {
+      "category": "basic_fee",
+      "price_type": "fixed",
+      "amount_low": 895,
+      "amount_high": 895
+    },
+    "sie": {
+      "prediction": {
+        "category": "basic_fee",
+        "price_type": "fixed",
+        "amount_low": 895.0,
+        "amount_high": 895.0
+      },
+      "latency_ms": 951,
+      "estimated_usd": 6.898750000000002e-05,
+      "item_count": 1
+    },
+    "llm": {
+      "prediction": {
+        "category": "basic_fee",
+        "price_type": "fixed",
+        "amount_low": 895.0,
+        "amount_high": 895.0
+      },
+      "latency_ms": 1216,
+      "estimated_usd": 0.00016075,
+      "raw": "{\n  \"category\": \"basic_fee\",\n  \"price_type\": \"fixed\",\n  \"amount_low\": 895.0,\n  \"amount_high\": 895.0\n}",
+      "usage": {
+        "prompt_tokens": 126,
+        "completion_tokens": 47,
+        "total_tokens": 173,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "credits_charged": 17,
+        "credits_charged_decimal": "17.000000",
+        "rate_book_version": "2026-11-10-production-bootstrap-v59"
+      }
+    }
+  },
+  {
+    "id": "A-unresolved",
+    "source": "data/quote_A.txt",
+    "text": "| Crematory charges                                 | TBC        | To be confirmed                    |",
+    "gold": {
+      "category": "basic_fee",
+      "price_type": "unknown",
+      "amount_low": null,
+      "amount_high": null
+    },
+    "sie": {
+      "prediction": {
+        "category": "basic_fee",
+        "price_type": "unknown",
+        "amount_low": null,
+        "amount_high": null
+      },
+      "latency_ms": 521,
+      "estimated_usd": 6.898750000000002e-05,
+      "item_count": 1
+    },
+    "llm": {
+      "prediction": {
+        "category": "optional",
+        "price_type": "unknown",
+        "amount_low": null,
+        "amount_high": null
+      },
+      "latency_ms": 1152,
+      "estimated_usd": 0.000128,
+      "raw": "{\n  \"category\": \"optional\",\n  \"price_type\": \"unknown\",\n  \"amount_low\": null,\n  \"amount_high\": null\n}",
+      "usage": {
+        "prompt_tokens": 116,
+        "completion_tokens": 36,
+        "total_tokens": 152,
+        "prompt_tokens_details": {
+          "cached_tokens": 64
+        },
+        "credits_charged": 12,
+        "credits_charged_decimal": "12.000000",
+        "rate_book_version": "2026-11-10-production-bootstrap-v59"
+      }
+    }
+  },
+  {
+    "id": "B-crematory",
+    "source": "data/quote_B.txt",
+    "text": "The crematory fee is $350.00.",
+    "gold": {
+      "category": "basic_fee",
+      "price_type": "fixed",
+      "amount_low": 350,
+      "amount_high": 350
+    },
+    "sie": {
+      "prediction": {
+        "category": "basic_fee",
+        "price_type": "fixed",
+        "amount_low": 350.0,
+        "amount_high": 350.0
+      },
+      "latency_ms": 439,
+      "estimated_usd": 6.03665e-05,
+      "item_count": 1
+    },
+    "llm": {
+      "prediction": {
+        "category": "basic_fee",
+        "price_type": "fixed",
+        "amount_low": 350.0,
+        "amount_high": 350.0
+      },
+      "latency_ms": 1246,
+      "estimated_usd": 0.00015775,
+      "raw": "{\n  \"category\": \"basic_fee\",\n  \"price_type\": \"fixed\",\n  \"amount_low\": 350.0,\n  \"amount_high\": 350.0\n}",
+      "usage": {
+        "prompt_tokens": 114,
+        "completion_tokens": 47,
+        "total_tokens": 161,
+        "prompt_tokens_details": {
+          "cached_tokens": 64
+        },
+        "credits_charged": 15,
+        "credits_charged_decimal": "15.000000",
+        "rate_book_version": "2026-11-10-production-bootstrap-v59"
+      }
+    }
+  },
+  {
+    "id": "B-container",
+    "source": "data/quote_B.txt",
+    "text": "an alternative container made of corrugated fiberboard, which is $95.00.",
+    "gold": {
+      "category": "basic_fee",
+      "price_type": "fixed",
+      "amount_low": 95,
+      "amount_high": 95
+    },
+    "sie": {
+      "prediction": {
+        "category": "basic_fee",
+        "price_type": "fixed",
+        "amount_low": 95.0,
+        "amount_high": 95.0
+      },
+      "latency_ms": 556,
+      "estimated_usd": 6.5376e-05,
+      "item_count": 1
+    },
+    "llm": {
+      "prediction": {
+        "category": "optional",
+        "price_type": "fixed",
+        "amount_low": 95.0,
+        "amount_high": 95.0
+      },
+      "latency_ms": 1355,
+      "estimated_usd": 0.00015125,
+      "raw": "{\n  \"category\": \"optional\",\n  \"price_type\": \"fixed\",\n  \"amount_low\": 95.0,\n  \"amount_high\": 95.0\n}",
+      "usage": {
+        "prompt_tokens": 121,
+        "completion_tokens": 44,
+        "total_tokens": 165,
+        "prompt_tokens_details": {
+          "cached_tokens": 64
+        },
+        "credits_charged": 14,
+        "credits_charged_decimal": "14.000000",
+        "rate_book_version": "2026-11-10-production-bootstrap-v59"
+      }
+    }
+  },
+  {
+    "id": "C-embalming",
+    "source": "data/quote_C.txt",
+    "text": "Embalming \u2014 $795",
+    "gold": {
+      "category": "optional",
+      "price_type": "fixed",
+      "amount_low": 795,
+      "amount_high": 795
+    },
+    "sie": {
+      "prediction": {
+        "category": "optional",
+        "price_type": "fixed",
+        "amount_low": 795.0,
+        "amount_high": 795.0
+      },
+      "latency_ms": 486,
+      "estimated_usd": 5.8852000000000005e-05,
+      "item_count": 1
+    },
+    "llm": {
+      "prediction": {
+        "category": "optional",
+        "price_type": "fixed",
+        "amount_low": 795,
+        "amount_high": 795
+      },
+      "latency_ms": 1112,
+      "estimated_usd": 0.0001425,
+      "raw": "{\n  \"category\": \"optional\",\n  \"price_type\": \"fixed\",\n  \"amount_low\": 795,\n  \"amount_high\": 795\n}",
+      "usage": {
+        "prompt_tokens": 108,
+        "completion_tokens": 42,
+        "total_tokens": 150,
+        "prompt_tokens_details": {
+          "cached_tokens": 64
+        },
+        "credits_charged": 13,
+        "credits_charged_decimal": "13.000000",
+        "rate_book_version": "2026-11-10-production-bootstrap-v59"
+      }
+    }
+  },
+  {
+    "id": "C-viewing",
+    "source": "data/quote_C.txt",
+    "text": "Public viewing / visitation, one evening (up to 3 hours) \u2014 $650.00",
+    "gold": {
+      "category": "optional",
+      "price_type": "fixed",
+      "amount_low": 650,
+      "amount_high": 650
+    },
+    "sie": {
+      "prediction": {
+        "category": "optional",
+        "price_type": "fixed",
+        "amount_low": 650.0,
+        "amount_high": 650.0
+      },
+      "latency_ms": 465,
+      "estimated_usd": 6.4677e-05,
+      "item_count": 1
+    },
+    "llm": {
+      "prediction": {
+        "category": "optional",
+        "price_type": "fixed",
+        "amount_low": 650.0,
+        "amount_high": 650.0
+      },
+      "latency_ms": 1459,
+      "estimated_usd": 0.0001575,
+      "raw": "{\n  \"category\": \"optional\",\n  \"price_type\": \"fixed\",\n  \"amount_low\": 650.0,\n  \"amount_high\": 650.0\n}",
+      "usage": {
+        "prompt_tokens": 124,
+        "completion_tokens": 46,
+        "total_tokens": 170,
+        "prompt_tokens_details": {
+          "cached_tokens": 64
+        },
+        "credits_charged": 15,
+        "credits_charged_decimal": "15.000000",
+        "rate_book_version": "2026-11-10-production-bootstrap-v59"
+      }
+    }
+  },
+  {
+    "id": "C-flowers",
+    "source": "data/quote_C.txt",
+    "text": "Floral arrangement (casket spray) \u2014 starting at $350",
+    "gold": {
+      "category": "optional",
+      "price_type": "starting_at",
+      "amount_low": 350,
+      "amount_high": null
+    },
+    "sie": {
+      "prediction": {
+        "category": "optional",
+        "price_type": "starting_at",
+        "amount_low": 350.0,
+        "amount_high": null
+      },
+      "latency_ms": 444,
+      "estimated_usd": 6.3046e-05,
+      "item_count": 1
+    },
+    "llm": {
+      "prediction": {
+        "category": "optional",
+        "price_type": "starting_at",
+        "amount_low": 350,
+        "amount_high": null
+      },
+      "latency_ms": 1235,
+      "estimated_usd": 0.00013875,
+      "raw": "{\n  \"category\": \"optional\",\n  \"price_type\": \"starting_at\",\n  \"amount_low\": 350,\n  \"amount_high\": null\n}",
+      "usage": {
+        "prompt_tokens": 115,
+        "completion_tokens": 40,
+        "total_tokens": 155,
+        "prompt_tokens_details": {
+          "cached_tokens": 64
+        },
+        "credits_charged": 13,
+        "credits_charged_decimal": "13.000000",
+        "rate_book_version": "2026-11-10-production-bootstrap-v59"
+      }
+    }
+  },
+  {
+    "id": "C-casket",
+    "source": "data/quote_C.txt",
+    "text": "Cremation casket, oak finish \u2014 $1,895.00",
+    "gold": {
+      "category": "optional",
+      "price_type": "fixed",
+      "amount_low": 1895,
+      "amount_high": 1895
+    },
+    "sie": {
+      "prediction": {
+        "category": "optional",
+        "price_type": "fixed",
+        "amount_low": 1895.0,
+        "amount_high": 1895.0
+      },
+      "latency_ms": 391,
+      "estimated_usd": 6.1648e-05,
+      "item_count": 1
+    },
+    "llm": {
+      "prediction": {
+        "category": "optional",
+        "price_type": "fixed",
+        "amount_low": 1895.0,
+        "amount_high": 1895.0
+      },
+      "latency_ms": 1494,
+      "estimated_usd": 0.000167,
+      "raw": "{\n  \"category\": \"optional\",\n  \"price_type\": \"fixed\",\n  \"amount_low\": 1895.00,\n  \"amount_high\": 1895.00\n}",
+      "usage": {
+        "prompt_tokens": 118,
+        "completion_tokens": 50,
+        "total_tokens": 168,
+        "prompt_tokens_details": {
+          "cached_tokens": 64
+        },
+        "credits_charged": 16,
+        "credits_charged_decimal": "16.000000",
+        "rate_book_version": "2026-11-10-production-bootstrap-v59"
+      }
+    }
+  },
+  {
+    "id": "C-certificates",
+    "source": "data/quote_C.txt",
+    "text": "Certified copies of death certificate (cash advance) \u2014 $24 per copy, est. $48\u2013$96",
+    "gold": {
+      "category": "cash_advance",
+      "price_type": "estimated",
+      "amount_low": 48,
+      "amount_high": 96
+    },
+    "sie": {
+      "prediction": {
+        "category": "cash_advance",
+        "price_type": "fixed",
+        "amount_low": 24.0,
+        "amount_high": 24.0
+      },
+      "latency_ms": 443,
+      "estimated_usd": 6.6308e-05,
+      "item_count": 2
+    },
+    "llm": {
+      "prediction": {
+        "category": "cash_advance",
+        "price_type": "estimated",
+        "amount_low": 48,
+        "amount_high": 96
+      },
+      "latency_ms": 1221,
+      "estimated_usd": 0.00014425,
+      "raw": "{\n  \"category\": \"cash_advance\",\n  \"price_type\": \"estimated\",\n  \"amount_low\": 48,\n  \"amount_high\": 96\n}",
+      "usage": {
+        "prompt_tokens": 126,
+        "completion_tokens": 41,
+        "total_tokens": 167,
+        "prompt_tokens_details": {
+          "cached_tokens": 64
+        },
+        "credits_charged": 13,
+        "credits_charged_decimal": "13.000000",
+        "rate_book_version": "2026-11-10-production-bootstrap-v59"
+      }
+    }
+  },
+  {
+    "id": "C-package",
+    "source": "data/quote_C.txt",
+    "text": "Celebration Package price: $6,495.00 (death certificate copies billed separately)",
+    "gold": {
+      "category": "package",
+      "price_type": "fixed",
+      "amount_low": 6495,
+      "amount_high": 6495
+    },
+    "sie": {
+      "prediction": {
+        "category": "package",
+        "price_type": "fixed",
+        "amount_low": 6495.0,
+        "amount_high": 6495.0
+      },
+      "latency_ms": 422,
+      "estimated_usd": 6.64245e-05,
+      "item_count": 1
+    },
+    "llm": {
+      "prediction": {
+        "category": "package",
+        "price_type": "fixed",
+        "amount_low": 6495.0,
+        "amount_high": 6495.0
+      },
+      "latency_ms": 1468,
+      "estimated_usd": 0.00016775,
+      "raw": "{\n  \"category\": \"package\",\n  \"price_type\": \"fixed\",\n  \"amount_low\": 6495.00,\n  \"amount_high\": 6495.00\n}",
+      "usage": {
+        "prompt_tokens": 121,
+        "completion_tokens": 50,
+        "total_tokens": 171,
+        "prompt_tokens_details": {
+          "cached_tokens": 64
+        },
+        "credits_charged": 16,
+        "credits_charged_decimal": "16.000000",
+        "rate_book_version": "2026-11-10-production-bootstrap-v59"
+      }
+    }
+  },
+  {
+    "id": "C-requirement",
+    "source": "data/quote_C.txt",
+    "text": "A casket purchase is required for direct cremation.",
+    "gold": {
+      "category": "stated_requirement",
+      "price_type": "unknown",
+      "amount_low": null,
+      "amount_high": null
+    },
+    "sie": {
+      "prediction": {
+        "category": "stated_requirement",
+        "price_type": "unknown",
+        "amount_low": null,
+        "amount_high": null
+      },
+      "latency_ms": 495,
+      "estimated_usd": 6.29295e-05,
+      "item_count": 1
+    },
+    "llm": {
+      "prediction": {
+        "category": "stated_requirement",
+        "price_type": "unknown",
+        "amount_low": null,
+        "amount_high": null
+      },
+      "latency_ms": 1068,
+      "estimated_usd": 0.00013525,
+      "raw": "{\n  \"category\": \"stated_requirement\",\n  \"price_type\": \"unknown\",\n  \"amount_low\": null,\n  \"amount_high\": null\n}",
+      "usage": {
+        "prompt_tokens": 112,
+        "completion_tokens": 39,
+        "total_tokens": 151,
+        "prompt_tokens_details": {
+          "cached_tokens": 64
+        },
+        "credits_charged": 13,
+        "credits_charged_decimal": "13.000000",
+        "rate_book_version": "2026-11-10-production-bootstrap-v59"
+      }
+    }
+  },
+  {
+    "id": "GPL-basic",
+    "source": "data/real_gpl.pdf",
+    "text": "Basic Services $2,195",
+    "gold": {
+      "category": "basic_fee",
+      "price_type": "fixed",
+      "amount_low": 2195,
+      "amount_high": 2195
+    },
+    "sie": {
+      "prediction": {
+        "category": "basic_fee",
+        "price_type": "fixed",
+        "amount_low": 2195.0,
+        "amount_high": 2195.0
+      },
+      "latency_ms": 378,
+      "estimated_usd": 5.943450000000001e-05,
+      "item_count": 1
+    },
+    "llm": {
+      "prediction": {
+        "category": "basic_fee",
+        "price_type": "fixed",
+        "amount_low": 2195,
+        "amount_high": 2195
+      },
+      "latency_ms": 1192,
+      "estimated_usd": 0.000151,
+      "raw": "{\n  \"category\": \"basic_fee\",\n  \"price_type\": \"fixed\",\n  \"amount_low\": 2195,\n  \"amount_high\": 2195\n}",
+      "usage": {
+        "prompt_tokens": 109,
+        "completion_tokens": 45,
+        "total_tokens": 154,
+        "prompt_tokens_details": {
+          "cached_tokens": 64
+        },
+        "credits_charged": 14,
+        "credits_charged_decimal": "14.000000",
+        "rate_book_version": "2026-11-10-production-bootstrap-v59"
+      }
+    }
+  },
+  {
+    "id": "GPL-crematory",
+    "source": "data/real_gpl.pdf",
+    "text": "Crematory Fee (Irvington) $695",
+    "gold": {
+      "category": "basic_fee",
+      "price_type": "fixed",
+      "amount_low": 695,
+      "amount_high": 695
+    },
+    "sie": {
+      "prediction": {
+        "category": "basic_fee",
+        "price_type": "fixed",
+        "amount_low": 695.0,
+        "amount_high": 695.0
+      },
+      "latency_ms": 461,
+      "estimated_usd": 6.0483000000000004e-05,
+      "item_count": 1
+    },
+    "llm": {
+      "prediction": {
+        "category": "basic_fee",
+        "price_type": "fixed",
+        "amount_low": 695,
+        "amount_high": 695
+      },
+      "latency_ms": 1360,
+      "estimated_usd": 0.0001465,
+      "raw": "{\n  \"category\": \"basic_fee\",\n  \"price_type\": \"fixed\",\n  \"amount_low\": 695,\n  \"amount_high\": 695\n}",
+      "usage": {
+        "prompt_tokens": 113,
+        "completion_tokens": 43,
+        "total_tokens": 156,
+        "prompt_tokens_details": {
+          "cached_tokens": 64
+        },
+        "credits_charged": 14,
+        "credits_charged_decimal": "14.000000",
+        "rate_book_version": "2026-11-10-production-bootstrap-v59"
+      }
+    }
+  }
+]
