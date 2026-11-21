@@ -5,3 +5,6 @@ __pycache__/
 .cognee*/
 .streamlit/secrets.toml
 .lw_dev.sqlite
+
+# chat app
+.chat_tmp/
