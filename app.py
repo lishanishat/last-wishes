@@ -17,7 +17,26 @@ from agent import ApprovalBlocked, ModuleNotReady, fmt_money, item_amount_text
 
 ARRANGEMENT_SENT = "Arrangement request sent — awaiting provider confirmation."
 
-st.set_page_config(page_title="Last Wishes", layout="wide")
+st.set_page_config(page_title="Last Wishes", page_icon="🕊️", layout="wide")
+
+st.markdown("""
+<style>
+  .block-container {max-width: 1100px; padding-top: 2rem;}
+  h1 {font-family: Georgia, 'Times New Roman', serif; font-weight: 600; letter-spacing: -0.5px;}
+  h2, h3, h4 {font-family: Georgia, 'Times New Roman', serif; font-weight: 600;}
+  .lw-hero {background: linear-gradient(135deg, rgba(196,154,108,0.18), rgba(120,140,170,0.12));
+            border-radius: 18px; padding: 22px 26px; margin-bottom: 18px;}
+  .lw-hero p {font-size: 1.05rem; line-height: 1.6; margin: 0.3rem 0;}
+  .lw-step {border-left: 4px solid #c49a6c; background: rgba(196,154,108,0.10);
+            border-radius: 10px; padding: 12px 16px; margin: 6px 0 16px; font-size: 0.98rem; line-height: 1.5;}
+  .stTabs [data-baseweb="tab"] {font-size: 1rem; padding: 8px 14px;}
+  .stButton button[kind="primary"] {border-radius: 999px; padding: 0.5rem 1.4rem;}
+</style>
+""", unsafe_allow_html=True)
+
+
+def step_note(text: str) -> None:
+    st.markdown(f'<div class="lw-step">{text}</div>', unsafe_allow_html=True)
 
 try:
     agent.init()
@@ -71,22 +90,32 @@ with st.sidebar:
             st.success("Demo data cleared.")
             st.rerun()
 
-st.title("Last Wishes")
-st.caption("Here's what she wanted, what the quotes include, and what changed after the family asked.")
+st.title("🕊️ Last Wishes")
+st.markdown("""
+<div class="lw-hero">
+<p><b>When someone you love dies, you have a few days to plan a funeral, often while grieving.</b></p>
+<p>Last Wishes remembers what they wanted, reads each funeral home's price list for you, points out anything
+missing or questionable, and only sends a message when you say so.</p>
+<p style="opacity:0.8">Work through the tabs left to right: <b>1 → 7</b>. The agent follows up. The family decides.</p>
+</div>
+""", unsafe_allow_html=True)
 
-tabs = st.tabs(["Wishes", "Quotes", "Compare", "Approvals", "Inbox", "Memory", "Diff"])
+tabs = st.tabs(["1 · 💛 Her wishes", "2 · 📄 Price lists", "3 · ⚖️ Compare", "4 · ✉️ Send & approve",
+                "5 · 📬 Replies", "6 · 🧠 What it remembers", "7 · 🔄 What changed"])
 
 # ---------------------------------------------------------------------------
 # Wishes
 # ---------------------------------------------------------------------------
 
 with tabs[0]:
-    st.subheader("What she wanted")
+    st.subheader("What Linda wanted")
+    step_note("Start here. These are Linda's own words, recorded while she was alive, and confirmed by her daughter. "
+              "Everything the agent does is checked against them.")
     with guard("Wishes"):
         ws = agent.wishes()
         if not ws:
             st.write("No wishes loaded yet. These come from the recorded note and the family's confirmation.")
-            if st.button("Load wishes from the recorded note and confirmation"):
+            if st.button("💛 Load Linda's wishes"):
                 agent.ingest_wishes()
                 st.rerun()
         else:
@@ -106,23 +135,25 @@ with tabs[0]:
 # ---------------------------------------------------------------------------
 
 with tabs[1]:
-    st.subheader("Read quotes")
+    st.subheader("Funeral home price lists")
+    step_note("A <b>price list</b> (or quote) is what each funeral home sends: what they offer and what it costs. "
+              "They all use different formats. Pick the ones to read and press the button. The agent pulls out every item and price.")
     candidates = sorted(p for p in agent.DATA_DIR.glob("*")
                         if p.suffix.lower() in (".txt", ".pdf") and p.name not in agent.WISH_FILES
                         and not p.name.startswith(("reply", "ftc")))
-    picked = st.multiselect("Quote documents in data/", [p.name for p in candidates],
+    picked = st.multiselect("Price lists to read", [p.name for p in candidates],
                             default=[p.name for p in candidates if p.name.startswith("quote_")])
     overrides = {}
     if picked:
         cols = st.columns(min(len(picked), 4))
         for i, name in enumerate(picked):
             with cols[i % len(cols)]:
-                overrides[name] = st.text_input(f"Provider for {name}",
+                overrides[name] = st.text_input(f"Funeral home name for {name}",
                                                 value=agent.provider_from_filename(name) or "",
                                                 key=f"prov_{name}")
-    up = st.file_uploader("Or upload a quote (.txt or .pdf)", type=["txt", "pdf"])
-    up_provider = st.text_input("Provider for the uploaded file", value="", key="prov_upload") if up else ""
-    if st.button("Read quotes", type="primary"):
+    up = st.file_uploader("Or upload your own price list (.txt or .pdf)", type=["txt", "pdf"])
+    up_provider = st.text_input("Funeral home name for the uploaded file", value="", key="prov_upload") if up else ""
+    if st.button("📄 Read these price lists", type="primary"):
         with guard("Reading quotes"):
             existing = agent.latest_quotes()
             jobs = [(agent.DATA_DIR / n, overrides.get(n)) for n in picked]
@@ -151,7 +182,7 @@ with tabs[1]:
     with guard("Quotes"):
         qs = agent.quotes()
         if not qs:
-            st.write("No quotes read yet.")
+            st.write("Nothing read yet. Press the button above.")
         for q in qs:
             sup = f" · supersedes {q['supersedes_id']}" if q.get("supersedes_id") else ""
             with st.expander(f"{q['quote_id']} — provider {q['provider']} (fictional), version {q['version']}{sup}"):
@@ -167,11 +198,14 @@ with tabs[1]:
 # ---------------------------------------------------------------------------
 
 with tabs[2]:
-    st.subheader("Compare")
+    st.subheader("Side by side")
+    step_note("Here are the funeral homes next to each other. Prices that weren't listed show as <b>Unresolved</b>, never $0, "
+              "so nobody looks cheaper by leaving things out. <b>Flags</b> are things worth asking about, and <b>Not needed</b> "
+              "lists extras that go against Linda's wishes.")
     with guard("Comparison"):
         latest = agent.latest_quotes()
         if not latest:
-            st.write("Read quotes first.")
+            st.write("Read the price lists in tab 2 first.")
         else:
             if st.button("Re-run comparison"):
                 agent.run_analysis()
@@ -199,7 +233,7 @@ with tabs[2]:
             st.caption("Unresolved charges are shown as Unresolved, never as $0. Totals are for the services "
                        "that match the wishes.")
 
-            st.markdown("#### Review flags")
+            st.markdown("#### 🚩 Worth asking about")
             all_flags = [f for q in latest.values() for f in agent.flags(q["quote_id"])]
             if not all_flags:
                 st.write("No review flags.")
@@ -216,7 +250,7 @@ with tabs[2]:
                     st.write(f.get("message"))
                 st.divider()
 
-            st.markdown("#### Not needed")
+            st.markdown("#### ✂️ Extras she didn't want")
             items_by_id = {it["item_id"]: it for q in latest.values() for it in agent.quote_items(q["quote_id"])}
             nn_rows = []
             for prov, q in sorted(latest.items()):
@@ -231,7 +265,7 @@ with tabs[2]:
             else:
                 st.write("Nothing to leave out.")
 
-            st.markdown("#### Suggested plan")
+            st.markdown("#### ✅ Plan that honors her wishes")
             if chosen:
                 c_items = [items_by_id[i] for i in chosen.get("items") or [] if i in items_by_id]
                 st.write(f"Based on **{chosen['quote_id']}** · known {money_cell(chosen.get('known_total'))}"
@@ -279,9 +313,11 @@ def render_card(card: dict, persona_inquiry: str | None = None, persona_ok: bool
 
 
 with tabs[3]:
-    st.subheader("Approvals")
-    st.caption("Each approval covers exactly one message. If the quote changes, the approval is invalidated.")
-    st.markdown("#### 1 · Clarification")
+    st.subheader("Messages to send")
+    step_note("The agent drafts messages, but <b>nothing is sent until you approve it</b>. Each approval covers exactly one message. "
+              "If a price changes, you'll be asked again. Step 1 asks a funeral home about something missing. "
+              "Step 2 sends the family's final choice.")
+    st.markdown("#### 1 · Ask about what's missing")
     with guard("Clarification"):
         latest = agent.latest_quotes()
         flagged = sorted({f["quote_id"].rsplit("-v", 1)[0] for q in latest.values() for f in agent.flags(q["quote_id"])
@@ -299,7 +335,7 @@ with tabs[3]:
             with st.container(border=True):
                 render_card(card)
 
-    st.markdown("#### 2 · Arrangement request")
+    st.markdown("#### 2 · Send the family's choice")
     with guard("Arrangement"):
         latest = agent.latest_quotes()
         if not latest:
@@ -317,7 +353,7 @@ with tabs[3]:
                 st.write(f"Family's selection: **{sel['quote_id']}**"
                          + ("" if sel["quote_id"] in options else " (superseded — select again)"))
 
-            st.markdown("**Identity check**")
+            st.markdown("**🪪 Quick identity check** (so nobody can send this on the family's behalf)")
             ps: dict = {}
             with guard("Identity check"):
                 from persona import PERSONA_COPY  # noqa: E402
@@ -375,8 +411,9 @@ with tabs[3]:
 # ---------------------------------------------------------------------------
 
 with tabs[4]:
-    st.subheader("Inbox")
-    st.caption("Upload or paste a provider's reply. It is read with the same extraction as the quotes.")
+    st.subheader("Replies from funeral homes")
+    step_note("When a funeral home answers your question, drop their reply here. The agent reads it the same way it read the price lists, "
+              "keeps the old version, and updates the plan.")
     with guard("Inbox"):
         latest = agent.latest_quotes()
         if not latest:
@@ -397,7 +434,7 @@ with tabs[4]:
                 text_or_path = st.text_area("Reply text", height=200) or None
             provs = sorted(latest)
             prov = st.selectbox("From provider", provs, index=provs.index(guess) if guess in provs else 0)
-            if st.button("Read reply", type="primary", disabled=not text_or_path):
+            if st.button("📬 Read this reply", type="primary", disabled=not text_or_path):
                 with st.spinner("Reading the reply, recalling context, rebuilding the plan…"):
                     res = agent.ingest_reply(text_or_path, prov, filename=fname)
                 st.success(f"Created {res['new_quote_id']} (kept {res['old_quote_id']}). See the Diff tab.")
@@ -436,17 +473,18 @@ def render_graph(nodes: list[dict], edges: list[dict]):
 
 
 with tabs[5]:
-    st.subheader("Memory")
-    st.caption("Recall from the memory graph. The query, answer, nodes and edges are shown as returned.")
+    st.subheader("What the agent remembers")
+    step_note("Even after the app is closed and reopened, the agent remembers Linda's wishes, the questions it asked, and every version "
+              "of each price list. Ask it anything below. You'll see exactly which memories it used.")
     with guard("Memory"):
         ws = agent.wishes()
-        query = st.text_input("Query", value="What was pending, and what did she want?")
+        query = st.text_input("Ask the agent", value="What was pending, and what did she want?")
         cf = st.toggle("Counterfactual: recall without one wish")
         excl = []
         if cf:
             ids = [w["wish_id"] for w in ws] or ["W3"]
             excl = [st.selectbox("Leave out", ids, index=ids.index("W3") if "W3" in ids else 0)]
-        if st.button("Recall", type="primary"):
+        if st.button("🧠 Remember", type="primary"):
             with st.spinner("Searching memory…"):
                 agent.recall(query, exclude_wish_ids=excl)
             st.rerun()
@@ -481,11 +519,12 @@ with tabs[5]:
 # ---------------------------------------------------------------------------
 
 with tabs[6]:
-    st.subheader("What changed")
+    st.subheader("What changed after the family asked")
+    step_note("The old price list is kept, the new one sits next to it, and the agent explains in plain words what changed and why it matters.")
     with guard("Diff"):
         d = agent.latest_reply_diff()
         if not d:
-            st.write("No provider reply yet.")
+            st.write("No reply yet. Add one in tab 5.")
         else:
             diff = d.get("diff") or {}
             st.write(f"**{d['old_quote_id']}** (kept) → **{d['new_quote_id']}** from {d.get('filename')}")
