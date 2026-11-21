@@ -20,7 +20,7 @@ Cognee, Superlinked SIE, SingleStore, Persona (sandbox), Firedrill.
 
 ## Checklist for Lisha (by hand)
 - [x] Repo is pushed and public (https://github.com/lishanishat/last-wishes). `.env` is gitignored and was never committed.
-- [ ] Warm up SIE, then confirm Persona sandbox reaches `approved` and Approval #2 sends, before recording.
+- [ ] Warm up SIE (one extraction) and click Reset demo data before recording. Approval #2 was confirmed to send in rehearsal; Persona approval there was the sandbox simulate button.
 - [ ] Record a demo video of 3 minutes or less following `DEMO_SCRIPT.md`, including the on-camera Streamlit stop/restart (use `.venv/bin/streamlit run app.py`). Do not show the SingleStore Connect panel or `.env`. Label any cached footage "recorded replay".
 - [ ] Take a screenshot (for example the Compare tab with the review flag, or the Memory tab after restart).
 - [ ] Fill in emails and links above and submit the form by 4:00 PM (official deadline 4:30 PM).

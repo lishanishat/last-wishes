@@ -38,7 +38,7 @@ The SingleStore password appeared in chat screenshots: reset it after submission
 ## Rehearsal 1 (live app)
 - Steps 1-5 and 8 passed.
 - `reply_A_alt` crash fixed in commit a3a024e. B $50 dropped-item fix in commit 222095b.
-- Approval #2 send was **not observed** in rehearsal 1. It is being re-run by another agent; do not state it passed until that result is in.
+- Rehearsal 2 (live app, SingleStore, live SIE): B known $2,385; reply_A_alt and reply_A_v2 both give A-v2 with crematory $395; Approval #2 sent with the exact status text and 2 outbox rows; Persona approval was sandbox-simulated (hosted flow not completed headlessly). Chat app (`chat_app.py`) passed its 5 steps on SQLite, not SingleStore.
 
 ## Real-world benchmark
 Manank reports a held-out run (8 public price lists, 137 items: found 81.8%, amount 93.8%, price type 72.3%, category 48.2%, all four 41.6%). Not re-run here; `bench/realworld/results.md` is not in the repo yet. README states this.
